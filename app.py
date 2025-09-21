@@ -450,6 +450,7 @@ class MainWindow(QMainWindow):
             models = os.path.normpath(join("resources","models"))
             styles = os.path.normpath(join("resources","styles"))
             videos = os.path.normpath(join("resources","videos"))
+            temp = os.path.normpath("temp")
             haarcascades = os.path.normpath(join("resources","haarcascades"))
             if os.path.isdir(images):
                 pass
@@ -471,6 +472,10 @@ class MainWindow(QMainWindow):
                 pass
             else:
                 os.makedirs(haarcascades, exist_ok=True)
+            if os.path.isdir(temp):
+                pass
+            else:
+                os.makedirs(temp, exist_ok=True)
 
     def Upload_Files(self,type):
           self.CheckCreateDefaultFolders()
@@ -664,20 +669,10 @@ class MainWindow(QMainWindow):
              if text.strip() != "":
                 QMessageBox.critical(None, "Image Extension Error", "Valid Extensions: " + " jpg , jpeg , png , gif , bmp , psd ")
 
-    def PrepareSelectDeepLearningCamera(self,comboBox,text):
+    def PrepareSelectCamera(self,comboBox,text):
         self.ResetComboBoxSelections(comboBox)
         if text != "":
            self.DLOperationsHandler.SelectDeepLearningCamera(text)
-
-    def LoadFramePdf(self, filename):
-        pdfpath = "pages/" + filename
-        self.pdf_path = os.path.relpath(pdfpath)
-        self.frame_pdf_document.load(self.pdf_path)
-        self.frame_pdf_view.pdf_path = self.pdf_path
-        self.frame_pdf_view.setDocument(self.frame_pdf_document)
-        self.frame_pdf_view.pdf_document = self.frame_pdf_document
-        self.frame_pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
-        self.frame_pdf_view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
 
     def PrepareSelectDeepLearningOperations(self,comboBox,operation):
         self.ResetComboBoxSelections(comboBox)
@@ -706,7 +701,63 @@ class MainWindow(QMainWindow):
             
             accuracy = float(self.ui.comboBox_FilterAccuracy_DeepLearningFoundation.currentText().split("%")[0])/100
             self.DLOperationsHandler.SelectDeepLearningOperations(operation,imagePath, accuracy)                     
-            
+
+    def PrepareRecordHandGesture(self):
+        if self.ImagesAndColorsHandler.camera is not None and self.ImagesAndColorsHandler.Check_Camera_Availability(self.ImagesAndColorsHandler.camera):
+            if self.ui.textEdit_InsertSampleNameStep2CreateSimpleCNN2.toPlainText().strip() != "":
+                sender = self.sender().objectName()
+                GestureName = self.ui.textEdit_InsertSampleNameStep2CreateSimpleCNN2.toPlainText().strip()
+                match sender:
+                    case "pushButton_RecordTrainStep3CreateSimpleCNN2":
+                        self.CreateHandGestureRecognitionCNNHandler.RecordHandGesture("train",GestureName)
+                    case "pushButton_RecordTestStep4CreateSimpleCNN2":
+                        self.CreateHandGestureRecognitionCNNHandler.RecordHandGesture("test",GestureName)
+
+            else:
+                QMessageBox.warning(None,"No Name Inserted","First, Insert a Name for Gesture!")
+        else:
+            QMessageBox.warning(None,"No Camera Selected","First, Select a Camera!")
+
+    def PrepareTestHandGestureModel(self):
+        if self.ImagesAndColorsHandler.camera is not None and self.ImagesAndColorsHandler.Check_Camera_Availability(self.ImagesAndColorsHandler.camera):
+            HandGestureModelPath = os.path.normpath("./resources/models/SimpleHandGestureCNN.keras")
+            if os.path.exists(HandGestureModelPath):
+                self.CreateHandGestureRecognitionCNNHandler.TestHandGestureModel()
+            else:
+                QMessageBox.warning(None,"Model not Found","First, Create a Hand Gesture Model!")
+        else:
+            QMessageBox.warning(None,"No Camera Selected","First, Select a Camera!")
+
+    def PrepareEnhanceDataset(self):
+        if self.ui.textEdit_InsertSampleNameStep2CreateSimpleCNN2.toPlainText().strip() != "":
+           GestureName = self.ui.textEdit_InsertSampleNameStep2CreateSimpleCNN2.toPlainText().strip()  
+           GestureTrainPath = "./temp/handgesture/train/" + GestureName
+           GestureTestPath = "./temp/handgesture/test/" + GestureName
+           checkTrain = os.path.exists(GestureTrainPath) and os.path.isdir(GestureTrainPath)
+           checkTest = os.path.exists(GestureTestPath) and os.path.isdir(GestureTestPath)
+           if not checkTrain:
+              QMessageBox.warning(None,"No Train Samples","First, Record Train Samples for Gesture!")
+           elif not checkTest:
+              QMessageBox.warning(None,"No Test Samples","First, Record Test Samples for Gesture!")
+           else:
+                self.CreateHandGestureRecognitionCNNHandler.EnhanceDataset(GestureName)
+        else:
+            QMessageBox.warning(None,"No Name Inserted","First, Insert a Name for Gesture!")
+    
+    def PrepareTrainHandGestureModel(self):
+        total_epochs = int(self.ui.comboBox_Epochs_Step7CreateSimpleCNN2.currentText())
+        self.CreateHandGestureRecognitionCNNHandler.TrainModel(total_epochs)
+
+    def LoadFramePdf(self, filename):
+        pdfpath = "pages/" + filename
+        self.pdf_path = os.path.relpath(pdfpath)
+        self.frame_pdf_document.load(self.pdf_path)
+        self.frame_pdf_view.pdf_path = self.pdf_path
+        self.frame_pdf_view.setDocument(self.frame_pdf_document)
+        self.frame_pdf_view.pdf_document = self.frame_pdf_document
+        self.frame_pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
+        self.frame_pdf_view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+
     def ResetComboBoxSelections(self, comboBox):
         if not comboBox.objectName().__contains__("comboBox_SelectOperationDeepLearningFoundation"):
             self.lower()
@@ -853,6 +904,18 @@ class MainWindow(QMainWindow):
         self.ui.action_StudyPlan.triggered.connect(partial(self.changePDFPage,3))
         self.ui.action_HeadingResearch.triggered.connect(partial(self.changePDFPage,4))
         self.ui.action_UserGuide.triggered.connect(partial(self.changePDFPage,5))
+        self.action_MLBigPicture.triggered.connect(partial(self.changePDFPage,6))
+        self.action_CategorizingByLearningParadigm.triggered.connect(partial(self.changePDFPage,7))
+        self.action_FromFundamentalsToAdvanced.triggered.connect(partial(self.changePDFPage,8))
+        self.action_CodeSamplesByLearningParadigm.triggered.connect(partial(self.changePDFPage,9))
+        self.action_DeeperCodeSamplesWithDefinitions.triggered.connect(partial(self.changePDFPage,10))
+        self.action_TheoreticalFoundationsOfComputerVision.triggered.connect(partial(self.changePDFPage,11))
+        self.action_Numpy.triggered.connect(partial(self.changePDFPage,12))
+        self.action_Pandas.triggered.connect(partial(self.changePDFPage,13))
+        self.action_MatPlotLib.triggered.connect(partial(self.changePDFPage,14))
+        self.action_SeaBorn.triggered.connect(partial(self.changePDFPage,15))
+        self.action_SupervisedMLProcess.triggered.connect(partial(self.changePDFPage,16))
+        self.action_TheoreticalDeepLearningFoundation.triggered.connect(partial(self.changePDFPage,17))
 
         self.ui.action_AboutTool.triggered.connect(self.changePage)
         self.ui.action_AboutAuthorDeveloper.triggered.connect(self.changePage)
@@ -867,19 +930,23 @@ class MainWindow(QMainWindow):
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
         self.ui.action_CloseAllWindows.triggered.connect(self.closeWindow)
+
         self.ui.action_CreateDefaultFolders.triggered.connect(self.CheckCreateDefaultFolders)
+
         self.ui.action_UploadImages.triggered.connect(self.Upload_Files)
         self.ui.action_UploadVideos.triggered.connect(self.Upload_Files)
         self.ui.action_UploadModels.triggered.connect(self.Upload_Files)
         self.ui.pushButton_UploadImages.clicked.connect(self.Upload_Files)
         self.ui.pushButton_UploadVideos.clicked.connect(self.Upload_Files)
         self.ui.pushButton_UploadImages_DeepLearningFoundation.clicked.connect(self.Upload_Files)
-        self.ui.pushButton_UploadVideos_DeepLearningFoundation.clicked.connect(self.Upload_Files)    
-        self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
+        self.ui.pushButton_UploadVideos_DeepLearningFoundation.clicked.connect(self.Upload_Files)  
+
         self.ui.pushButton_SaveCode.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_ImageAndColors))
         self.ui.pushButton_SaveCode_CreateSimpleCNN.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CreateSimpleCNN))
         self.ui.pushButton_SaveCode_DeepLearningFoundation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DeepLearningFoundation))
         self.ui.pushButton_SaveCode_CreateSimpleCNN2.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CreateSimpleCNN2))
+
+        self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
         self.ui.horizontalSlider_SkewHeight.valueChanged.connect(self.PrepareSkewImage)
         self.ui.horizontalSlider_SkewWidth.valueChanged.connect(self.PrepareSkewImage)
@@ -915,24 +982,13 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_PlotAccuracy_Step4CreateSimpleCNN.clicked.connect(self.CreateSimpleCNNHandler.PlotAccuracy)
         self.ui.pushButton_PlotLoss_Step4CreateSimpleCNN.clicked.connect(self.CreateSimpleCNNHandler.PlotLoss)
         self.ui.pushButton_SaveTrainedModel_Step4CreateSimpleCNN.clicked.connect(self.CreateSimpleCNNHandler.SaveTrainedModel)
-        self.action_MLBigPicture.triggered.connect(partial(self.changePDFPage,6))
-        self.action_CategorizingByLearningParadigm.triggered.connect(partial(self.changePDFPage,7))
-        self.action_FromFundamentalsToAdvanced.triggered.connect(partial(self.changePDFPage,8))
-        self.action_CodeSamplesByLearningParadigm.triggered.connect(partial(self.changePDFPage,9))
-        self.action_DeeperCodeSamplesWithDefinitions.triggered.connect(partial(self.changePDFPage,10))
-        self.action_TheoreticalFoundationsOfComputerVision.triggered.connect(partial(self.changePDFPage,11))
-        self.action_Numpy.triggered.connect(partial(self.changePDFPage,12))
-        self.action_Pandas.triggered.connect(partial(self.changePDFPage,13))
-        self.action_MatPlotLib.triggered.connect(partial(self.changePDFPage,14))
-        self.action_SeaBorn.triggered.connect(partial(self.changePDFPage,15))
-        self.action_SupervisedMLProcess.triggered.connect(partial(self.changePDFPage,16))
-        self.action_TheoreticalDeepLearningFoundation.triggered.connect(partial(self.changePDFPage,17)) 
-       
+
         self.action_ProbabilityAndStatistics.triggered.connect(partial(self.Pdf_In_Browser,"https://mml-book.github.io/book/mml-book.pdf",False))
         self.action_PythonProgramming.triggered.connect(partial(self.Pdf_In_Browser,"https://www.w3schools.com/python/default.asp",False))
         self.action_LinearAlgebraAndCalculus.triggered.connect(partial(self.Pdf_In_Browser,"https://github.com/Ryota-Kawamura/Mathematics-for-Machine-Learning-and-Data-Science-Specialization",False))
         self.action_MLModelOverview.triggered.connect(partial(self.Pdf_In_Browser,"https://apple.github.io/coremltools/docs-guides/source/mlmodel.html",False))
         self.action_CoreMLModelFormatSpecification.triggered.connect(partial(self.Pdf_In_Browser,"https://apple.github.io/coremltools/mlmodel/index.html",False))       
+      
         self.ImagesAndColorsHandler.valueChanged.connect(self.SetImageInfo)
         self.ImagesAndColorsHandler.ImageSizeChanged.connect(self.ImageSizeChanged)
         for channel in self.ColorChannelChangeCheckBoxes:
@@ -945,10 +1001,20 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_SelectImage.currentTextChanged.connect(partial(self.PrepareSelectImage,self.ui.comboBox_SelectImage ))
         self.ui.comboBox_SelectVideo.currentTextChanged.connect(partial(self.PrepareSelectVideo,self.ui.comboBox_SelectVideo))
         self.ui.comboBox_SelectImage_DeepLearningFoundation.currentTextChanged.connect(partial(self.PrepareSelectImage,self.ui.comboBox_SelectImage_DeepLearningFoundation ))
-        self.ui.comboBox_SelectCameraDeepLearningFoundation.currentTextChanged.connect(partial(self.PrepareSelectDeepLearningCamera,self.ui.comboBox_SelectCameraDeepLearningFoundation))
+        self.ui.comboBox_SelectCameraDeepLearningFoundation.currentTextChanged.connect(partial(self.PrepareSelectCamera,self.ui.comboBox_SelectCameraDeepLearningFoundation))
         self.ui.comboBox_SelectVideo_DeepLearningFoundation.currentTextChanged.connect(partial(self.PrepareSelectVideo,self.ui.comboBox_SelectVideo_DeepLearningFoundation))
         self.ui.comboBox_SelectOperationDeepLearningFoundation.currentTextChanged.connect(partial(self.PrepareSelectDeepLearningOperations,self.ui.comboBox_SelectOperationDeepLearningFoundation))
-        self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.currentTextChanged.connect(partial(self.PrepareSelectDeepLearningCamera,self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2))
+        self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.currentTextChanged.connect(partial(self.PrepareSelectCamera,self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2))
+
+        self.ui.pushButton_RecordTrainStep3CreateSimpleCNN2.clicked.connect(self.PrepareRecordHandGesture)
+        self.ui.pushButton_TestTrainedModel_Step8CreateSimpleCNN2.clicked.connect(self.PrepareTestHandGestureModel)
+        self.ui.pushButton_RecordTestStep4CreateSimpleCNN2.clicked.connect(self.PrepareRecordHandGesture)
+        self.ui.pushButton_EnhanceDatasetStep5CreateSimpleCNN2.clicked.connect(self.PrepareEnhanceDataset)
+        self.ui.pushButton_CreateModel_Step6CreateSimpleCNN2.clicked.connect(self.CreateHandGestureRecognitionCNNHandler.CreateModel)
+        self.ui.pushButton_ModelSummary_Step6CreateSimpleCNN2.clicked.connect(self.CreateHandGestureRecognitionCNNHandler.ModelSummaryFunction)
+        self.ui.pushButton_TrainModel_Step7CreateSimpleCNN2.clicked.connect(self.PrepareTrainHandGestureModel)
+        self.ui.pushButton_SaveTrainedModel_Step7CreateSimpleCNN2.clicked.connect(self.CreateHandGestureRecognitionCNNHandler.SaveTrainedModel)
+        self.ui.pushButton_CancelTraining_Step7CreateSimpleCNN2.clicked.connect(self.CreateHandGestureRecognitionCNNHandler.CancelTraining)
 
     def ManualSetup(self):
         self.ImagesAndColorsHandler = ImagesAndColorsManipulationsAndOprations()
@@ -1091,6 +1157,7 @@ class MainWindow(QMainWindow):
         self.ui.label_ImageWidthValue.setStyleSheet("color:red")
         self.ui.label_ImageHeightValue.setStyleSheet("color:red")
         self.ui.comboBox_Epochs_Step4CreateSimpleCNN.setCurrentIndex(1)
+        self.ui.comboBox_Epochs_Step7CreateSimpleCNN2.setCurrentIndex(5)
         self.ui.comboBox_FilterAccuracy_DeepLearningFoundation.setCurrentIndex(12)
         self.ui.pages.setCurrentWidget(self.ui.page_AboutTool)
         self.CheckCreateDefaultFolders()
@@ -1098,8 +1165,7 @@ class MainWindow(QMainWindow):
         self.FillCode(ImagesAndColorsManipulationsAndOprations,self.ui.textBrowser_ImageAndColors, 15)
         self.FillCode(CreateSimpleCNN,self.ui.textBrowser_CreateSimpleCNN, 25)
         self.FillCode(DeepLearningFoundationOperations,self.ui.textBrowser_DeepLearningFoundation, 16)
-        self.FillCode(CreateHandGestureRecognitionCNN,self.ui.textBrowser_CreateSimpleCNN2, 20)
-
+        self.FillCode(CreateHandGestureRecognitionCNN,self.ui.textBrowser_CreateSimpleCNN2, 26)
 
 def LunchApp():
     import sys

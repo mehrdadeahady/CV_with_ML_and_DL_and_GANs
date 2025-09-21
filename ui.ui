@@ -3002,9 +3002,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="pushButton_CancelTraining_Step7CreateSimpleCNN2">
       <property name="geometry">
        <rect>
-        <x>470</x>
+        <x>490</x>
         <y>470</y>
-        <width>131</width>
+        <width>141</width>
         <height>31</height>
        </rect>
       </property>
@@ -3033,19 +3033,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="text">
        <string>Create Model</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_PlotAccuracy_Step7CreateSimpleCNN2">
-      <property name="geometry">
-       <rect>
-        <x>730</x>
-        <y>470</y>
-        <width>131</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Plot Accuracy</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_Step6CreateSimpleCNN2">
@@ -3111,7 +3098,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>340</x>
         <y>470</y>
-        <width>131</width>
+        <width>141</width>
         <height>31</height>
        </rect>
       </property>
@@ -3338,19 +3325,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
       </widget>
      </widget>
-     <widget class="QPushButton" name="pushButton_PlotLoss_Step7CreateSimpleCNN2">
-      <property name="geometry">
-       <rect>
-        <x>600</x>
-        <y>470</y>
-        <width>131</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Plot Loss </string>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_Step3CreateSimpleCNN2">
       <property name="geometry">
        <rect>
@@ -3514,9 +3488,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="pushButton_SaveTrainedModel_Step7CreateSimpleCNN2">
       <property name="geometry">
        <rect>
-        <x>860</x>
+        <x>640</x>
         <y>470</y>
-        <width>131</width>
+        <width>141</width>
         <height>31</height>
        </rect>
       </property>
@@ -3537,25 +3511,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>8) Testing the Model:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_LoadTrainedModel_Step8CreateSimpleCNN2">
-      <property name="geometry">
-       <rect>
-        <x>240</x>
-        <y>510</y>
-        <width>361</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Load Trained Model</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="pushButton_TestTrainedModel_Step8CreateSimpleCNN2">
       <property name="geometry">
        <rect>
-        <x>600</x>
+        <x>340</x>
         <y>510</y>
-        <width>391</width>
+        <width>441</width>
         <height>31</height>
        </rect>
       </property>

@@ -275,7 +275,7 @@ class CreateSimpleCNN(QObject):
     
     # Create a Simple CNN Model
     def CreateModel(self):
-        if len(self.x_train) ==0 or len(self.y_train) ==0 or len(self.x_test) ==0  or len(self.y_test) ==0:
+        if len(self.x_train) == 0 or len(self.y_train) == 0 or len(self.x_test) == 0  or len(self.y_test) == 0:
             QMessageBox.warning(None,"No Data","First Load MNIST Dataset!")
         elif len(self.x_train.shape) < 4:
             QMessageBox.warning(None,"Data is not Ready","First Prepare Data!")
@@ -461,7 +461,7 @@ class CreateSimpleCNN(QObject):
 
     # Train the Model in another Thread
     def TrainModel(self,total_epochs):
-        if len(self.x_train) ==0 or len(self.y_train) ==0 or len(self.x_test) ==0  or len(self.y_test) ==0:
+        if len(self.x_train) == 0 or len(self.y_train) == 0 or len(self.x_test) == 0  or len(self.y_test) ==0:
             QMessageBox.warning(None,"No Data","First Load MNIST Dataset!")
         elif len(self.x_train.shape) < 4:
             QMessageBox.warning(None,"Data is not Ready","First Prepare Data!")
@@ -742,5 +742,4 @@ class TrainingLogPopupClass(QDialog):
     import matplotlib.pyplot as plt
     from os.path import isfile, join
     '''
-
 
