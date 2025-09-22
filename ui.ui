@@ -100,7 +100,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="page_ImagesAndColorsManipulationsAndOprations">
      <property name="sizePolicy">
@@ -3522,6 +3522,374 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="text">
        <string>Test Hand Gesture Recognition by Trained Model</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_FaceRecognitionOperation">
+     <widget class="QLabel" name="label_Step1_Help_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>971</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>For Creating a Face Collection Dataset first Insert a Name for Face then Upload an Image to Crop its Face and Add it to the Collection Dataset in this path: resources/images/faces/</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="plainTextEdit_SelectName_Step1_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>60</y>
+        <width>381</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step1_SelectName_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>65</y>
+        <width>101</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Insert Face Name:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_UploadImage_Step1_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>60</y>
+        <width>221</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Upload an Image to Crop | Store its Face:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_UploadImage_Step1_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>60</y>
+        <width>251</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Upload an Image to Crop | Store its Face</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>190</y>
+        <width>971</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string> 3) Comparison Two Faces to Check Similarity:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step1_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>971</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1) Creating a Face Collection | Dataset:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_SelectFaceOne_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>250</y>
+        <width>91</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select First Face:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_SelectFaceTwo_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>250</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select Second Face:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_SelectFaceOne_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>250</y>
+        <width>381</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+     </widget>
+     <widget class="QComboBox" name="comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>630</x>
+        <y>250</y>
+        <width>361</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_VerifaySimilarity_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>290</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Compare | Verify Similarity of the Two Above Selected Images:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_VerifaySimilarity_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>290</y>
+        <width>471</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Compare | Verify Similarity of the Two Above Selected Images</string>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="textBrowser_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>550</y>
+        <width>981</width>
+        <height>131</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SaveCode__FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>680</y>
+        <width>100</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Code</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step4_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>340</y>
+        <width>391</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string> 4) Face Recognition on Camera:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Help_Step4_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>370</y>
+        <width>971</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>For Face Recognition on Camera, First Create a Face Collection Dataset from Desired People in Step 1 Then by Turning Camera in Front of their Face their Name Appears on their Head:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Help_Step3_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>220</y>
+        <width>971</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>For Comparison Two Faces to Check Similarity, First Create a Face Collection Dataset from Desired People in Step 1 Then Select two Images for comparison:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_FaceRecognitionCamera_Step4_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>400</y>
+        <width>471</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Face Recognition on Camera</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_SelectCamera_Step4_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>400</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select a Camera:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_SelectCamera_Step4_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>400</y>
+        <width>381</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_Step5_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>450</y>
+        <width>981</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string> 5) Face Recognition on Video:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_FaceRecognitionVideo_Step5_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>510</y>
+        <width>471</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Face Recognition on Video</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_SelectVideo_Step5_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>510</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select a Video:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_SelectVideo_Step5_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>510</y>
+        <width>381</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_Help_Step5_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>480</y>
+        <width>971</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>For Face Recognition on Video, First Create a Face Collection Dataset from Desired People in Step 1 Then Click the Face Recognition on Video Button</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step2_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>107</y>
+        <width>981</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>2) Create Face Recognition Model | Download | Load Pre-Trained VGGFace Weights into the Model:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CreateUploadLoadModel_Step2_FaceRecognitionOperation">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>140</y>
+        <width>971</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Create Face Recognition Model | Download | Load Pre-Trained VGGFace Weights into the Model</string>
       </property>
      </widget>
     </widget>

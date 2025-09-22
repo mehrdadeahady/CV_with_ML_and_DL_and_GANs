@@ -1089,6 +1089,11 @@ class DeepLearningFoundationOperations(QObject):
                         filepath = os.path.splitext(filepath)[0] + ".weights"
                         self.PreProcessAllYOLOModels(imagePath,filepath,CFG_Path,operationType,modelType) 
 
+                case "VGGFace":
+                    # VGGFace Operation located on another page
+                    # Here we only download its Model Weights
+                    pass
+
     # Check, Validation for Downloading Pre-Trained Model                
     def PreProcessImage(self, imagePath,modelType,operationType,Optimized = False):
         ConditionToCheck = None

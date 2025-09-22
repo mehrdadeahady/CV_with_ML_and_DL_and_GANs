@@ -15,3 +15,5 @@
 + Undergraduate students seeking an accessible intro to vision systems.             
 + Graduate students looking for deeper dives into model architectures and performance.       
 + PhD researchers exploring novel applications or improvements in vision-based AI.     
+
+![UI](/icons/AppUI.jpg)

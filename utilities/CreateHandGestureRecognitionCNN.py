@@ -154,6 +154,7 @@ class CreateHandGestureRecognitionCNN(QObject):
         # Release Camera
         self.ImagesAndColorsHandler.videoCapturer.release()
         cv2.destroyAllWindows() 
+        QMessageBox.warning(None,"Attention!","Recording Train Samples and Test Samples both Required for Each Gesture.")
 
     # Improving Dataset Efficiency
     def EnhanceDataset(self, GestureName):

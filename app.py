@@ -81,6 +81,7 @@ class MainWindow(QMainWindow):
         self.menu_PracticalDeepLearningFoundations.setTitle(_translate("MainWindow","🛠 Practical"))
         self.action_DeepLearningFoundationOperations.setText(_translate("MainWindow","✳️ Deep Learning Foundation Operations"))
         self.action_CreateHandGestureRecognItionCNN.setText(_translate("MainWindow","✋🏻 Create Hand Gesture RecognItion CNN"))
+        self.action_FaceRecognitionOperation.setText(_translate("MainWindow","🧑🏻‍🦱 Face Recognition Operation"))
 
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -451,6 +452,7 @@ class MainWindow(QMainWindow):
             styles = os.path.normpath(join("resources","styles"))
             videos = os.path.normpath(join("resources","videos"))
             temp = os.path.normpath("temp")
+            faces = os.path.normpath("resources/images/faces")
             haarcascades = os.path.normpath(join("resources","haarcascades"))
             if os.path.isdir(images):
                 pass
@@ -476,6 +478,10 @@ class MainWindow(QMainWindow):
                 pass
             else:
                 os.makedirs(temp, exist_ok=True)
+            if os.path.isdir(faces):
+                pass
+            else:
+                os.makedirs(faces, exist_ok=True)
 
     def Upload_Files(self,type):
           self.CheckCreateDefaultFolders()
@@ -517,7 +523,7 @@ class MainWindow(QMainWindow):
                            shutil.copy2(path, dest_path)
 
                self.LoadResources()
-               #print(f"Selected file: {file_paths}")
+               # print(f"Selected file: {file_paths}")
 
     def Html_In_Window(self,path):
         #  path = os.path.abspath(path)
@@ -926,6 +932,7 @@ class MainWindow(QMainWindow):
         self.action_CreateSimpleCNNConvolutionalNeuralNetwork.triggered.connect(self.changePage)
         self.action_DeepLearningFoundationOperations.triggered.connect(self.changePage)
         self.action_CreateHandGestureRecognItionCNN.triggered.connect(self.changePage)
+        self.action_FaceRecognitionOperation.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1138,6 +1145,10 @@ class MainWindow(QMainWindow):
         self.action_CreateHandGestureRecognItionCNN = QtGui.QAction(parent=self)
         self.action_CreateHandGestureRecognItionCNN.setObjectName("action_CreateHandGestureRecognItionCNN")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_CreateHandGestureRecognItionCNN)
+        self.action_FaceRecognitionOperation = QtGui.QAction(parent=self)
+        self.action_FaceRecognitionOperation.setObjectName("action_FaceRecognitionOperation")
+        self.menu_PracticalDeepLearningFoundations.addAction(self.action_FaceRecognitionOperation)
+
         self.pdf_view = CustomPdfView(self.ui.pages)
         self.pdf_document = QPdfDocument(self.pdf_view)
         self.ui.pages.addWidget(self.pdf_view)       
