@@ -32,7 +32,7 @@ class ImagesAndColorsManipulationsAndOprations(QObject):
         self.camera = None
     
     # Consider|Attention: 
-    # Check List of Libraries to Install and Import at the End pf the Page
+    # Check List of Libraries to Install and Import at the End of the Page
     # All parameters Assigned have relation to Image Dimensions for Visibility of Changes in the Screen > image.shape = (height,width,depth)
     # OpenCV Functions have several Overloads (Same Method Names with different Parameters some of them Mandatory and some Optional):
     # Here Mandatory Parameters with some Optional Parameters filled, in Practical RealWorld Projects use IDE IntelliJ IDEA by pressing Ctrl + Space:
