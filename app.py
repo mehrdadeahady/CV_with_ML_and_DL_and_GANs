@@ -7,6 +7,7 @@ from utilities.CreateSimpleCNN import CreateSimpleCNN
 from utilities.DeepLearningFoundationOperations import DeepLearningFoundationOperations
 from utilities.CreateHandGestureRecognitionCNN import CreateHandGestureRecognitionCNN
 from utilities.UI_MainWindow import UI_MainWindow
+from utilities.FaceRecognitionOperation import FaceRecognitionOperation
 import os
 from os import path, listdir
 from os.path import isfile, join
@@ -483,7 +484,7 @@ class MainWindow(QMainWindow):
             else:
                 os.makedirs(faces, exist_ok=True)
 
-    def Upload_Files(self,type):
+    def Upload_Files(self,name):
           self.CheckCreateDefaultFolders()
           destination_folder = os.path.normpath("resources")
           sender = self.sender().objectName() 
@@ -516,6 +517,21 @@ class MainWindow(QMainWindow):
                                destination_folder = os.path.normpath(join("resources","Videos"))
                             else:
                                 QMessageBox.critical(None, "Video Extension Error: " + file_name, "Valid Extensions: " + " avi , mp4 , mpg , mpeg , mov , wmv , mkv , flv ")
+                                continue
+
+                        if sender.__contains__("FaceRecognitionOperation"):
+                            if self.Is_Valid_Extension(file_name.strip(),"image"):
+                               new_name = ""
+                               if name.strip() != "":
+                                  new_name = name +  file_name[file_name.rindex("."):]
+                               else:
+                                   new_name = file_name
+
+                               new_path = os.path.normpath("resources/images/faces/" + new_name)
+                               self.UploadFaceImage(path,new_path)
+                               return
+                            else:
+                                QMessageBox.critical(None, "Image Extension Error: " + file_name, "Valid Extensions: " + " jpg , jpeg , png , gif , bmp , psd ")
                                 continue
 
                         dest_path = os.path.join(destination_folder, file_name)
@@ -551,13 +567,15 @@ class MainWindow(QMainWindow):
             QDesktopServices.openUrl(QUrl(pdf_path))
 
     def LoadResources(self):
-        Base_Image_Path = os.path.normpath(join("resources","videos"))
-        for f in listdir(Base_Image_Path):
-            if isfile(join(Base_Image_Path, f)) and self.Is_Valid_Extension(f.strip(),"video"):
+        Base_Video_Path = os.path.normpath(join("resources","videos"))
+        for f in listdir(Base_Video_Path):
+            if isfile(join(Base_Video_Path, f)) and self.Is_Valid_Extension(f.strip(),"video"):
                if self.ui.comboBox_SelectVideo.findText(f) == -1 :
                   self.ui.comboBox_SelectVideo.addItem(f)
                if self.ui.comboBox_SelectVideo_DeepLearningFoundation.findText(f) == -1 :
                   self.ui.comboBox_SelectVideo_DeepLearningFoundation.addItem(f)
+               if self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.findText(f) == -1 :
+                  self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.addItem(f)
 
         Base_Image_Path = os.path.normpath(join("resources","images"))
         for f in listdir(Base_Image_Path):
@@ -567,12 +585,22 @@ class MainWindow(QMainWindow):
                if self.ui.comboBox_SelectImage_DeepLearningFoundation.findText(f) == -1 :
                   self.ui.comboBox_SelectImage_DeepLearningFoundation.addItem(f)
 
+        Base_FaceImage_Path = os.path.normpath("resources/images/faces")
+        for f in listdir(Base_FaceImage_Path):
+            if isfile(join(Base_FaceImage_Path, f)) and self.Is_Valid_Extension(f.strip(),"image"):
+               if self.ui.comboBox_SelectFaceOne_Step3_FaceRecognitionOperation.findText(f) == -1 :
+                  self.ui.comboBox_SelectFaceOne_Step3_FaceRecognitionOperation.addItem(f)
+               if self.ui.comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation.findText(f) == -1 :
+                  self.ui.comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation.addItem(f)
+
         for camera_info in enumerate_cameras(cv2.CAP_MSMF):
              cap = f"Index: {camera_info.index}, Name: {camera_info.name}, Backend: {camera_info.backend}"
              if self.ui.comboBox_SelectCameraDeepLearningFoundation.findText(cap) == -1 :
                   self.ui.comboBox_SelectCameraDeepLearningFoundation.addItem(cap)
              if self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.findText(cap) == -1 :
                   self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.addItem(cap)
+             if self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation.findText(cap) == -1 :
+                  self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation.addItem(cap)
 
     def FillCode(self, function, textBrowser, LineStart):
         function_code = inspect.getsource(function)
@@ -753,6 +781,61 @@ class MainWindow(QMainWindow):
     def PrepareTrainHandGestureModel(self):
         total_epochs = int(self.ui.comboBox_Epochs_Step7CreateSimpleCNN2.currentText())
         self.CreateHandGestureRecognitionCNNHandler.TrainModel(total_epochs)
+
+    def PrepareUploadFaceImage(self):
+        name = self.ui.plainTextEdit_SelectName_Step1_FaceRecognitionOperation.toPlainText().strip()
+        self.Upload_Files(name)
+            
+    def PrepareCompareVerifySimilarity(self):
+        face1 = self.ui.comboBox_SelectFaceOne_Step3_FaceRecognitionOperation.currentText().strip()
+        face2 = self.ui.comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation.currentText().strip()
+        if face1 == "" or face2 == "":
+           QMessageBox.warning(None,"2 Faces Required", "First, Select 2 Faces for Comparison.")
+        else:
+            self.FaceRecognitionOperationHandler.VerifySimilarity(face1,face2)
+
+    def PrepareFaceRecognitionOnCamera(self):
+        if self.ImagesAndColorsHandler.camera is not None and self.ImagesAndColorsHandler.Check_Camera_Availability(self.ImagesAndColorsHandler.camera):
+           self.FaceRecognitionOperationHandler.FaceRecognitionOnCamera()
+        else:
+            QMessageBox.warning(None,"No Camera Selected","First, Select a Camera!")
+
+    def PrepareFaceRecognitionOnVideo(self):
+        if self.ImagesAndColorsHandler.video is not None:
+           video = self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.currentText().strip()
+           if video != "":
+              videoPath = os.path.normpath("resources/videos/"+video)
+              self.FaceRecognitionOperationHandler.FaceRecognitionOnVideo(videoPath)
+           else:
+              QMessageBox.warning(None,"No Video Selected","First, Select a Video!")
+
+        else:
+            QMessageBox.warning(None,"No Video Selected","First, Select a Video!")
+
+    def UploadFaceImage(self,path,new_path):
+        if os.path.exists("resources/haarcascades/haarcascade_frontalface_default.xml"):
+            face_detector = cv2.CascadeClassifier('resources/haarcascades/haarcascade_frontalface_default.xml')
+            if isfile(path):
+                person_image = cv2.imread(path)
+                cv2.imshow("Original Image", person_image)
+                face_info = face_detector.detectMultiScale(person_image, 1.3, 5)
+                if len(face_info) > 0:
+                    for (x,y,w,h) in face_info:
+                        face = person_image[y:y+h, x:x+w]
+                        file_name = os.path.basename(new_path)
+                        roi = cv2.resize(face, (128, 128), interpolation = cv2.INTER_CUBIC)
+                   
+                    cv2.imwrite(new_path, roi)
+                    self.LoadResources()
+                    cv2.imshow(file_name, roi)        
+                else:
+                    QMessageBox.warning(None,"No Face Detected","Couldn't Detect any Face on this Image.")
+                    
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+        else:
+            QMessageBox.warning(None,"Haarcascade not found","haarcascade_frontalface_default.xml File not found in: resources/haarcascades Path")
 
     def LoadFramePdf(self, filename):
         pdfpath = "pages/" + filename
@@ -952,6 +1035,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode_CreateSimpleCNN.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CreateSimpleCNN))
         self.ui.pushButton_SaveCode_DeepLearningFoundation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DeepLearningFoundation))
         self.ui.pushButton_SaveCode_CreateSimpleCNN2.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CreateSimpleCNN2))
+        self.ui.pushButton_SaveCode__FaceRecognitionOperation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_FaceRecognitionOperation))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1012,6 +1096,8 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_SelectVideo_DeepLearningFoundation.currentTextChanged.connect(partial(self.PrepareSelectVideo,self.ui.comboBox_SelectVideo_DeepLearningFoundation))
         self.ui.comboBox_SelectOperationDeepLearningFoundation.currentTextChanged.connect(partial(self.PrepareSelectDeepLearningOperations,self.ui.comboBox_SelectOperationDeepLearningFoundation))
         self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.currentTextChanged.connect(partial(self.PrepareSelectCamera,self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2))
+        self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation.currentTextChanged.connect(partial(self.PrepareSelectCamera,self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation))
+        self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.currentTextChanged.connect(partial(self.PrepareSelectVideo,self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation))
 
         self.ui.pushButton_RecordTrainStep3CreateSimpleCNN2.clicked.connect(self.PrepareRecordHandGesture)
         self.ui.pushButton_TestTrainedModel_Step8CreateSimpleCNN2.clicked.connect(self.PrepareTestHandGestureModel)
@@ -1023,11 +1109,18 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveTrainedModel_Step7CreateSimpleCNN2.clicked.connect(self.CreateHandGestureRecognitionCNNHandler.SaveTrainedModel)
         self.ui.pushButton_CancelTraining_Step7CreateSimpleCNN2.clicked.connect(self.CreateHandGestureRecognitionCNNHandler.CancelTraining)
 
+        self.ui.pushButton_UploadImage_Step1_FaceRecognitionOperation.clicked.connect(self.PrepareUploadFaceImage)
+        self.ui.pushButton_CreateUploadLoadModel_Step2_FaceRecognitionOperation.clicked.connect(self.FaceRecognitionOperationHandler.CheckVGGFaceModel)
+        self.ui.pushButton_VerifaySimilarity_Step3_FaceRecognitionOperation.clicked.connect(self.PrepareCompareVerifySimilarity)
+        self.ui.pushButton_FaceRecognitionCamera_Step4_FaceRecognitionOperation.clicked.connect(self.PrepareFaceRecognitionOnCamera)
+        self.ui.pushButton_FaceRecognitionVideo_Step5_FaceRecognitionOperation.clicked.connect(self.PrepareFaceRecognitionOnVideo)
+
     def ManualSetup(self):
         self.ImagesAndColorsHandler = ImagesAndColorsManipulationsAndOprations()
         self.CreateSimpleCNNHandler = CreateSimpleCNN()
         self.DLOperationsHandler = DeepLearningFoundationOperations(self.ImagesAndColorsHandler, self.CreateSimpleCNNHandler)
         self.CreateHandGestureRecognitionCNNHandler = CreateHandGestureRecognitionCNN(self.ImagesAndColorsHandler, self.CreateSimpleCNNHandler)
+        self.FaceRecognitionOperationHandler = FaceRecognitionOperation(self.ImagesAndColorsHandler,self.DLOperationsHandler)
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
             self.ui.checkBox_GreenChannel,
@@ -1177,6 +1270,7 @@ class MainWindow(QMainWindow):
         self.FillCode(CreateSimpleCNN,self.ui.textBrowser_CreateSimpleCNN, 25)
         self.FillCode(DeepLearningFoundationOperations,self.ui.textBrowser_DeepLearningFoundation, 16)
         self.FillCode(CreateHandGestureRecognitionCNN,self.ui.textBrowser_CreateSimpleCNN2, 26)
+        self.FillCode(FaceRecognitionOperation,self.ui.textBrowser_FaceRecognitionOperation, 22)
 
 def LunchApp():
     import sys
@@ -1185,6 +1279,6 @@ def LunchApp():
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-    
+
 if __name__ == "__main__":
     LunchApp()

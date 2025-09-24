@@ -78,9 +78,9 @@
         "md5hash": "d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9"
     },
     "VGGFace": {
-        "url": "https://github.com/rcmalli/keras-vggface/releases/download/v1.0/vgg_face_weights.h5",
+        "url": "https://github.com/serengil/deepface_models/releases/download/v1.0/vgg_face_weights.h5",
         "name": "vgg_face_weights.h5",
-        "size": "580 MB",
+        "size": "553 MB",
         "md5hash": "unknown"
     }
 }

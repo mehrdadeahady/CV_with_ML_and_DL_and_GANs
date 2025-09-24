@@ -69,7 +69,7 @@ class DeepLearningFoundationOperations(QObject):
         self.log_emitter.progressbar_signal.connect(self.Update_Progress)  
         self.log_emitter.finished_signal.connect(self.On_Finished)
         self.LoadModelDetails()
-               
+        
     # Consider|Attention: 
     # Process Functions Contains Computer Vision Functions with Comments and Explanations
     # Rest of Functions are Pre-Processor and Helpers
