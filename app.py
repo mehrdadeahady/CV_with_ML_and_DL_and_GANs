@@ -8,6 +8,7 @@ from utilities.DeepLearningFoundationOperations import DeepLearningFoundationOpe
 from utilities.CreateHandGestureRecognitionCNN import CreateHandGestureRecognitionCNN
 from utilities.UI_MainWindow import UI_MainWindow
 from utilities.FaceRecognitionOperation import FaceRecognitionOperation
+from utilities.TransferLearning import TransferLearning
 import os
 from os import path, listdir
 from os.path import isfile, join
@@ -83,6 +84,7 @@ class MainWindow(QMainWindow):
         self.action_DeepLearningFoundationOperations.setText(_translate("MainWindow","✳️ Deep Learning Foundation Operations"))
         self.action_CreateHandGestureRecognItionCNN.setText(_translate("MainWindow","✋🏻 Create Hand Gesture RecognItion CNN"))
         self.action_FaceRecognitionOperation.setText(_translate("MainWindow","🧑🏻‍🦱 Face Recognition Operation"))
+        self.action_TransferLearning.setText(_translate("MainWindow","🔂 Transfer Learning"))
 
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -812,6 +814,15 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.warning(None,"No Video Selected","First, Select a Video!")
 
+    def PrepareSelectModel_TransferLearning(self,text):
+        if text.strip() != "":
+           self.TransferLearningHandler.CreateModel(text)
+
+    def PrepareTrainModelTransferLearning(self):
+        total_epochs = int(self.ui.comboBox_Epochs_Step4TransferLearning.currentText().strip())
+        print(total_epochs)
+        self.TransferLearningHandler.TrainModel(total_epochs)
+
     def UploadFaceImage(self,path,new_path):
         if os.path.exists("resources/haarcascades/haarcascade_frontalface_default.xml"):
             face_detector = cv2.CascadeClassifier('resources/haarcascades/haarcascade_frontalface_default.xml')
@@ -1016,6 +1027,7 @@ class MainWindow(QMainWindow):
         self.action_DeepLearningFoundationOperations.triggered.connect(self.changePage)
         self.action_CreateHandGestureRecognItionCNN.triggered.connect(self.changePage)
         self.action_FaceRecognitionOperation.triggered.connect(self.changePage)
+        self.action_TransferLearning.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1031,6 +1043,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_UploadImages_DeepLearningFoundation.clicked.connect(self.Upload_Files)
         self.ui.pushButton_UploadVideos_DeepLearningFoundation.clicked.connect(self.Upload_Files)  
 
+        self.ui.pushButton_SaveCode_TransferLearning.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_TransferLearning))
         self.ui.pushButton_SaveCode.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_ImageAndColors))
         self.ui.pushButton_SaveCode_CreateSimpleCNN.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CreateSimpleCNN))
         self.ui.pushButton_SaveCode_DeepLearningFoundation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DeepLearningFoundation))
@@ -1115,12 +1128,25 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_FaceRecognitionCamera_Step4_FaceRecognitionOperation.clicked.connect(self.PrepareFaceRecognitionOnCamera)
         self.ui.pushButton_FaceRecognitionVideo_Step5_FaceRecognitionOperation.clicked.connect(self.PrepareFaceRecognitionOnVideo)
 
+        self.ui.pushButton_LoadCIFER10_Step1TransferLearning.clicked.connect(self.TransferLearningHandler.Import_Load_Prepare_Cifar10)
+        self.ui.comboBox_SelectModel_Step3TransferLearning.currentTextChanged.connect(self.PrepareSelectModel_TransferLearning)
+        self.ui.pushButton_EnhancingDataset_Step2TransferLearning.clicked.connect(self.TransferLearningHandler.Enhance_Dataset)
+        self.ui.pushButton_ShowSummary_Step3TransferLearning.clicked.connect(self.TransferLearningHandler.ShowModelSummary)
+        self.ui.pushButton_CancelTraining_Step4TransferLearning.clicked.connect(self.TransferLearningHandler.CancelTraining)
+        self.ui.pushButton_TrainingModel_Step4TransferLearning.clicked.connect(self.PrepareTrainModelTransferLearning)
+        self.ui.pushButton_SaveTrainedModel_Step4TransferLearning.clicked.connect(self.TransferLearningHandler.SaveTrainedModel)
+        self.ui.pushButton_EvaluateModel_Step5TransferLearning.clicked.connect(self.TransferLearningHandler.EvaluateModel)
+        self.ui.pushButton_EvaluateModel_Step5TransferLearning.clicked.connect(self.TransferLearningHandler.EvaluateModel)
+        self.ui.pushButton_TestingModel_Step6TransferLearning.clicked.connect(self.TransferLearningHandler.TestingModel)
+
     def ManualSetup(self):
         self.ImagesAndColorsHandler = ImagesAndColorsManipulationsAndOprations()
         self.CreateSimpleCNNHandler = CreateSimpleCNN()
         self.DLOperationsHandler = DeepLearningFoundationOperations(self.ImagesAndColorsHandler, self.CreateSimpleCNNHandler)
         self.CreateHandGestureRecognitionCNNHandler = CreateHandGestureRecognitionCNN(self.ImagesAndColorsHandler, self.CreateSimpleCNNHandler)
         self.FaceRecognitionOperationHandler = FaceRecognitionOperation(self.ImagesAndColorsHandler,self.DLOperationsHandler)
+        self.TransferLearningHandler = TransferLearning(self.DLOperationsHandler,self.CreateSimpleCNNHandler)
+        
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
             self.ui.checkBox_GreenChannel,
@@ -1241,6 +1267,9 @@ class MainWindow(QMainWindow):
         self.action_FaceRecognitionOperation = QtGui.QAction(parent=self)
         self.action_FaceRecognitionOperation.setObjectName("action_FaceRecognitionOperation")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_FaceRecognitionOperation)
+        self.action_TransferLearning = QtGui.QAction(parent=self)
+        self.action_TransferLearning.setObjectName("action_TransferLearning")
+        self.menu_PracticalDeepLearningFoundations.addAction(self.action_TransferLearning)
 
         self.pdf_view = CustomPdfView(self.ui.pages)
         self.pdf_document = QPdfDocument(self.pdf_view)
@@ -1271,6 +1300,7 @@ class MainWindow(QMainWindow):
         self.FillCode(DeepLearningFoundationOperations,self.ui.textBrowser_DeepLearningFoundation, 16)
         self.FillCode(CreateHandGestureRecognitionCNN,self.ui.textBrowser_CreateSimpleCNN2, 26)
         self.FillCode(FaceRecognitionOperation,self.ui.textBrowser_FaceRecognitionOperation, 22)
+        self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
 
 def LunchApp():
     import sys

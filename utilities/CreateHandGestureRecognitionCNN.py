@@ -3,6 +3,7 @@ import os
 from os.path import isfile, join
 import time
 import json
+import math
 try:
     os.environ["KERAS_BACKEND"] = "tensorflow"  # or "jax", "torch"
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -305,8 +306,8 @@ class CreateHandGestureRecognitionCNN(QObject):
     
     # Train the Model in another Thread
     def TrainModel(self,total_epochs):
-        if self.model == None and self.train_generator == None:
-             QMessageBox.warning(None,"Model not Exist","First Create a Model!")  
+        if self.model == None or self.train_generator == None:
+             QMessageBox.warning(None,"Model not Exist","First Create a Model and Enhance Dataset!")  
         else:
             self.total_epochs = total_epochs
             self.batch_size = 32           
@@ -322,8 +323,8 @@ class CreateHandGestureRecognitionCNN(QObject):
                     for file in files:
                         self.number_of_validation_samples += 1  
 
-            self.validation_steps = self.number_of_train_samples // self.batch_size
-            self.steps_per_epoch =  self.number_of_validation_samples // self.batch_size
+            self.steps_per_epoch = math.ceil(self.number_of_train_samples / self.batch_size)
+            self.validation_steps = math.ceil(self.number_of_validation_samples / self.batch_size)
             try:
                 # Running the Training Model in a seperate Thread to ba able cancel long running process and Inversion of Control (IOC)
                 self.training_thread = TrainingThread(self._is_running,self.signal_emitter, self.total_epochs, self.steps_per_epoch,self.validation_steps, self.batch_size,self.model,self.train_generator,self.validation_generator)

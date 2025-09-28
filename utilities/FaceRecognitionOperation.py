@@ -98,48 +98,92 @@ class FaceRecognitionOperation(QObject):
         # To display the summary of the model so far, include the current output shape
         # Start model by passing an Input object to the model, so it knows its input shape which is 28 x 28 x 1
         model.add(keras.Input(shape = self.input_shape ))        
+       
+        ### First Block: Two Convolution Layers with ZeroPadding to preserve spatial dimensions
+
+        # Pad input to maintain spatial dimensions after convolution
+        model.add(ZeroPadding2D((1,1)))  
+        # First Conv Layer with 64 filters
+        model.add(Convolution2D(64, (3, 3), activation='relu'))  
+        # Pad again before next convolution
+        model.add(ZeroPadding2D((1,1)))  
+         # Second Conv Layer with 64 filters
+        model.add(Convolution2D(64, (3, 3), activation='relu')) 
+        # MaxPooling reduces spatial size by half
+        model.add(MaxPooling2D((2,2), strides=(2,2))) 
+
+        ### Second Block: Two Convolution Layers with 128 filters
+
+        # Pad input to maintain spatial dimensions after convolution
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(64, (3, 3), activation='relu'))
+        # First Conv Layer with 128 filters
+        model.add(Convolution2D(128, (3, 3), activation='relu'))  
+        # Pad again before next convolution
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(64, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2,2), strides=(2,2)))
+        # Second Conv Layer with 128 filters
+        model.add(Convolution2D(128, (3, 3), activation='relu'))  
+        # MaxPooling reduces spatial size
+        model.add(MaxPooling2D((2,2), strides=(2,2)))  
+
+        ### Third Block: Three Convolution Layers with 256 filters
 
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(128, (3, 3), activation='relu'))
+        # First Conv Layer with 256 filters
+        model.add(Convolution2D(256, (3, 3), activation='relu'))  
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(128, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2,2), strides=(2,2)))
+        # Second Conv Layer with 256 filters
+        model.add(Convolution2D(256, (3, 3), activation='relu'))  
+        model.add(ZeroPadding2D((1,1)))
+        # Third Conv Layer with 256 filters
+        model.add(Convolution2D(256, (3, 3), activation='relu'))  
+        # MaxPooling reduces spatial size
+        model.add(MaxPooling2D((2,2), strides=(2,2)))  
+
+        ### Fourth Block: Three Convolution Layers with 512 filters
 
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(256, (3, 3), activation='relu'))
+        # First Conv Layer with 512 filters
+        model.add(Convolution2D(512, (3, 3), activation='relu'))  
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(256, (3, 3), activation='relu'))
+        # Second Conv Layer with 512 filters
+        model.add(Convolution2D(512, (3, 3), activation='relu'))  
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(256, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2,2), strides=(2,2)))
+        # Third Conv Layer with 512 filters
+        model.add(Convolution2D(512, (3, 3), activation='relu'))  
+        # MaxPooling reduces spatial size
+        model.add(MaxPooling2D((2,2), strides=(2,2)))  
+
+        ### Fifth Block: Three Convolution Layers with 512 filters (same as previous block)
 
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(512, (3, 3), activation='relu'))
+        # First Conv Layer with 512 filters
+        model.add(Convolution2D(512, (3, 3), activation='relu'))  
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(512, (3, 3), activation='relu'))
+        # Second Conv Layer with 512 filters
+        model.add(Convolution2D(512, (3, 3), activation='relu'))  
         model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(512, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2,2), strides=(2,2)))
+        # Third Conv Layer with 512 filters
+        model.add(Convolution2D(512, (3, 3), activation='relu'))  
+        # MaxPooling reduces spatial size
+        model.add(MaxPooling2D((2,2), strides=(2,2)))  
 
-        model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(512, (3, 3), activation='relu'))
-        model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(512, (3, 3), activation='relu'))
-        model.add(ZeroPadding2D((1,1)))
-        model.add(Convolution2D(512, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2,2), strides=(2,2)))
+        ### Fully Connected Layers implemented as Convolution Layers
 
-        model.add(Convolution2D(4096, (7, 7), activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Convolution2D(4096, (1, 1), activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Convolution2D(2622, (1, 1)))
+        # First Dense Layer as Conv with 4096 filters
+        model.add(Convolution2D(4096, (7, 7), activation='relu'))  
+        # Dropout to reduce overfitting
+        model.add(Dropout(0.5))  
+        # Second Dense Layer as Conv
+        model.add(Convolution2D(4096, (1, 1), activation='relu'))  
+        # Dropout to reduce overfitting
+        model.add(Dropout(0.5))  
+        # Final Dense Layer as Conv with output units equal to number of classes
+        model.add(Convolution2D(2622, (1, 1)))  
+
+        # Flatten layer reshapes the tensor to 1D before classification
         model.add(Flatten())
+
+        # Softmax activation to produce probability distribution across all classes
         model.add(Activation('softmax'))
 
         self.model = model

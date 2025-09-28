@@ -100,7 +100,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>5</number>
     </property>
     <widget class="QWidget" name="page_ImagesAndColorsManipulationsAndOprations">
      <property name="sizePolicy">
@@ -3890,6 +3890,324 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="text">
        <string>Create Face Recognition Model | Download | Load Pre-Trained VGGFace Weights into the Model</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_TransferLearning">
+     <widget class="QLabel" name="label_Step1TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1) Import, Load and Prepare The CIFAR-10 dataset (Canadian Institute For Advanced Research) is a collection of images used to train machine learning and computer vision algorithms. </string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_LoadCIFER10_Step1TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Import Load Prepare CIFAR-10 Dataset</string>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="textBrowser_TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>430</y>
+        <width>981</width>
+        <height>251</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SaveCode_TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>680</y>
+        <width>100</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Code</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step3TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>140</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>3) Select a Model to Downloal - Load, Change Create and Build  without Top Layer for Transfer Learning:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_SelectModel_Step3TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>170</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>VGGNet16</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>VGGNet19</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ResNet50</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Xception</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_Step2TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>2) Augmenting and Enhancing the Dataset:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_EnhancingDataset_Step2TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>100</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Augmenting and Enhancing Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TrainingModel_Step4TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>240</y>
+        <width>281</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Train Model</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step4TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>210</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>4) Training Model without Top with Custom Classification Layer:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step5TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>280</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>5) Evaluate the Model:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_EvaluateModel_Step5TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>310</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Evaluate Model</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Step6TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>350</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>6) Testing the Model:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TestingModel_Step6TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>380</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Testing Model</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CancelTraining_Step4TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>240</y>
+        <width>281</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Cancel Training</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_Epochs_Step4TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>240</y>
+        <width>51</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>5</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>10</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>15</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>20</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>25</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>30</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>35</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>40</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>45</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>50</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SaveTrainedModel_Step4TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>710</x>
+        <y>240</y>
+        <width>281</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Trained Model</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Epochs_Step4TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>240</y>
+        <width>51</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Epochs:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_ShowSummary_Step3TransferLearning">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>170</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Show Model Summary</string>
       </property>
      </widget>
     </widget>
