@@ -9,6 +9,7 @@ from utilities.CreateHandGestureRecognitionCNN import CreateHandGestureRecogniti
 from utilities.UI_MainWindow import UI_MainWindow
 from utilities.FaceRecognitionOperation import FaceRecognitionOperation
 from utilities.TransferLearning import TransferLearning
+from utilities.NeuralStyleTransfer import NeuralStyleTransfer
 import os
 from os import path, listdir
 from os.path import isfile, join
@@ -85,6 +86,7 @@ class MainWindow(QMainWindow):
         self.action_CreateHandGestureRecognItionCNN.setText(_translate("MainWindow","✋🏻 Create Hand Gesture RecognItion CNN"))
         self.action_FaceRecognitionOperation.setText(_translate("MainWindow","🧑🏻‍🦱 Face Recognition Operation"))
         self.action_TransferLearning.setText(_translate("MainWindow","🔂 Transfer Learning"))
+        self.action_NeuralStyleTransfer.setText(_translate("MainWindow","🏊 Neural Style Transfer"))
 
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -1028,6 +1030,7 @@ class MainWindow(QMainWindow):
         self.action_CreateHandGestureRecognItionCNN.triggered.connect(self.changePage)
         self.action_FaceRecognitionOperation.triggered.connect(self.changePage)
         self.action_TransferLearning.triggered.connect(self.changePage)
+        self.action_NeuralStyleTransfer.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1049,6 +1052,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode_DeepLearningFoundation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DeepLearningFoundation))
         self.ui.pushButton_SaveCode_CreateSimpleCNN2.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CreateSimpleCNN2))
         self.ui.pushButton_SaveCode__FaceRecognitionOperation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_FaceRecognitionOperation))
+        self.ui.pushButton_SaveCode_NeuralStyleTransfer.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_NeuralStyleTransfer))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1146,6 +1150,7 @@ class MainWindow(QMainWindow):
         self.CreateHandGestureRecognitionCNNHandler = CreateHandGestureRecognitionCNN(self.ImagesAndColorsHandler, self.CreateSimpleCNNHandler)
         self.FaceRecognitionOperationHandler = FaceRecognitionOperation(self.ImagesAndColorsHandler,self.DLOperationsHandler)
         self.TransferLearningHandler = TransferLearning(self.DLOperationsHandler,self.CreateSimpleCNNHandler)
+        self.NeuralStyleTransferHandler = NeuralStyleTransfer()
         
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
@@ -1270,6 +1275,9 @@ class MainWindow(QMainWindow):
         self.action_TransferLearning = QtGui.QAction(parent=self)
         self.action_TransferLearning.setObjectName("action_TransferLearning")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_TransferLearning)
+        self.action_NeuralStyleTransfer = QtGui.QAction(parent=self)
+        self.action_NeuralStyleTransfer.setObjectName("action_NeuralStyleTransfer")
+        self.menu_PracticalDeepLearningFoundations.addAction(self.action_NeuralStyleTransfer)
 
         self.pdf_view = CustomPdfView(self.ui.pages)
         self.pdf_document = QPdfDocument(self.pdf_view)
@@ -1301,6 +1309,7 @@ class MainWindow(QMainWindow):
         self.FillCode(CreateHandGestureRecognitionCNN,self.ui.textBrowser_CreateSimpleCNN2, 26)
         self.FillCode(FaceRecognitionOperation,self.ui.textBrowser_FaceRecognitionOperation, 22)
         self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
+        self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 16)
 
 def LunchApp():
     import sys
