@@ -6,7 +6,7 @@ except:
     print("You Should Install PyQt6 Library!")
 
 class UI_MainWindow(object):
-  
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1024, 768)
@@ -1332,7 +1332,7 @@ class UI_MainWindow(object):
         self.pushButton_UploadStyles_NeuralStyleTransfer.setGeometry(QtCore.QRect(500, 0, 121, 31))
         self.pushButton_UploadStyles_NeuralStyleTransfer.setObjectName("pushButton_UploadStyles_NeuralStyleTransfer")
         self.textBrowser_NeuralStyleTransfer = QtWidgets.QTextBrowser(parent=self.page_NeuralStyleTransfer)
-        self.textBrowser_NeuralStyleTransfer.setGeometry(QtCore.QRect(10, 380, 981, 301))
+        self.textBrowser_NeuralStyleTransfer.setGeometry(QtCore.QRect(10, 410, 981, 271))
         self.textBrowser_NeuralStyleTransfer.setObjectName("textBrowser_NeuralStyleTransfer")
         self.label_SelectStyle_NeuralStyleTransfer = QtWidgets.QLabel(parent=self.page_NeuralStyleTransfer)
         self.label_SelectStyle_NeuralStyleTransfer.setGeometry(QtCore.QRect(670, 5, 71, 21))
@@ -1409,9 +1409,6 @@ class UI_MainWindow(object):
         self.label_BlueValue_NeuralStyleTransfer.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label_BlueValue_NeuralStyleTransfer.setObjectName("label_BlueValue_NeuralStyleTransfer")
         self.gridLayout_NeuralStyleTransfer.addWidget(self.label_BlueValue_NeuralStyleTransfer, 2, 2, 1, 1)
-        self.pushButton_TransferStyle_NeuralStyleTransfer = QtWidgets.QPushButton(parent=self.page_NeuralStyleTransfer)
-        self.pushButton_TransferStyle_NeuralStyleTransfer.setGeometry(QtCore.QRect(10, 330, 981, 41))
-        self.pushButton_TransferStyle_NeuralStyleTransfer.setObjectName("pushButton_TransferStyle_NeuralStyleTransfer")
         self.label_Sync_NeuralStyleTransfer = QtWidgets.QLabel(parent=self.page_NeuralStyleTransfer)
         self.label_Sync_NeuralStyleTransfer.setGeometry(QtCore.QRect(10, 40, 981, 21))
         self.label_Sync_NeuralStyleTransfer.setObjectName("label_Sync_NeuralStyleTransfer")
@@ -1425,6 +1422,24 @@ class UI_MainWindow(object):
         self.label_SyncSize_NeuralStyleTransfer.setGeometry(QtCore.QRect(20, 70, 471, 41))
         self.label_SyncSize_NeuralStyleTransfer.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label_SyncSize_NeuralStyleTransfer.setObjectName("label_SyncSize_NeuralStyleTransfer")
+        self.comboBox_TransferStyle_NeuralStyleTransfer = QtWidgets.QComboBox(parent=self.page_NeuralStyleTransfer)
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setGeometry(QtCore.QRect(10, 370, 981, 31))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setObjectName("comboBox_TransferStyle_NeuralStyleTransfer")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(0, "")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.comboBox_TransferStyle_NeuralStyleTransfer.addItem("")
+        self.label = QtWidgets.QLabel(parent=self.page_NeuralStyleTransfer)
+        self.label.setGeometry(QtCore.QRect(10, 330, 981, 31))
+        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label.setObjectName("label")
         self.pages.addWidget(self.page_NeuralStyleTransfer)
         self.page_AboutAuthorDeveloper = QtWidgets.QWidget()
         self.page_AboutAuthorDeveloper.setObjectName("page_AboutAuthorDeveloper")
@@ -1565,6 +1580,8 @@ class UI_MainWindow(object):
         self.action_UploadVideos.setObjectName("action_UploadVideos")
         self.action_UploadClassifiers = QtGui.QAction(parent=MainWindow)
         self.action_UploadClassifiers.setObjectName("action_UploadClassifiers")
+        self.action_UploadStyleTransferModels = QtGui.QAction(parent=MainWindow)
+        self.action_UploadStyleTransferModels.setObjectName("action_UploadStyleTransferModels")
         self.menuTopics.addSeparator()
         self.menuTopics.addSeparator()
         self.menuTopics.addAction(self.action_BigPicture)
@@ -1589,6 +1606,8 @@ class UI_MainWindow(object):
         self.menuSettings.addAction(self.action_UploadImages)
         self.menuSettings.addSeparator()
         self.menuSettings.addAction(self.action_UploadStyles)
+        self.menuSettings.addSeparator()
+        self.menuSettings.addAction(self.action_UploadStyleTransferModels)
         self.menuControls.addAction(self.action_CloseOtherWindows)
         self.menuControls.addSeparator()
         self.menuControls.addAction(self.action_CloseMainWindow)
@@ -1672,6 +1691,14 @@ class UI_MainWindow(object):
         self.label_Z2.setText(_translate("MainWindow", "Z2"))
         self.label_Z2_Value.setText(_translate("MainWindow", "250"))
         self.groupBox_AddText.setTitle(_translate("MainWindow", "Add Text"))
+        self.textEdit_AddText.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.pushButton_AddText.setText(_translate("MainWindow", "Add"))
         self.groupBox_Skew.setTitle(_translate("MainWindow", "Skew"))
         self.label_SkewHeight.setText(_translate("MainWindow", "Height"))
@@ -1887,6 +1914,14 @@ class UI_MainWindow(object):
         self.pushButton_RecordTrainStep3CreateSimpleCNN2.setText(_translate("MainWindow", "Record Hand Gesture - Train"))
         self.pushButton_RecordTestStep4CreateSimpleCNN2.setText(_translate("MainWindow", "Record Hand Gesture - Test"))
         self.label_Step2CreateSimpleCNN2.setText(_translate("MainWindow", "2) Insert a Name for Hand Gesture Sample:"))
+        self.textEdit_InsertSampleNameStep2CreateSimpleCNN2.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.pushButton_EnhanceDatasetStep5CreateSimpleCNN2.setText(_translate("MainWindow", "Enhance Dataset"))
         self.label_Step5CreateSimpleCNN2.setText(_translate("MainWindow", "5) Enhance Dataset by Keras Data Augmentation ( First make sure Train and Test samples Recorded ):"))
         self.pushButton_SaveTrainedModel_Step7CreateSimpleCNN2.setText(_translate("MainWindow", "Save Trained Model"))
@@ -1957,9 +1992,18 @@ class UI_MainWindow(object):
         self.label_RedValue_NeuralStyleTransfer.setText(_translate("MainWindow", "100"))
         self.label_GreenValue_NeuralStyleTransfer.setText(_translate("MainWindow", "115"))
         self.label_BlueValue_NeuralStyleTransfer.setText(_translate("MainWindow", "125"))
-        self.pushButton_TransferStyle_NeuralStyleTransfer.setText(_translate("MainWindow", "Tranfer selected Style to the Selected Image"))
         self.label_Sync_NeuralStyleTransfer.setText(_translate("MainWindow", "Sync Image Size and Style Size Base on Widths, Range between 50px to 1200px (Optional):"))
         self.label_SyncSize_NeuralStyleTransfer.setText(_translate("MainWindow", "50"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(1, _translate("MainWindow", "candy.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(2, _translate("MainWindow", "composition_vii.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(3, _translate("MainWindow", "feathers.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(4, _translate("MainWindow", "la_muse.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(5, _translate("MainWindow", "mosaic.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(6, _translate("MainWindow", "starry_night.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(7, _translate("MainWindow", "the_scream.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(8, _translate("MainWindow", "the_wave.t7"))
+        self.comboBox_TransferStyle_NeuralStyleTransfer.setItemText(9, _translate("MainWindow", "udnie.t7"))
+        self.label.setText(_translate("MainWindow", "Tranfer selected Style to the Selected Image by Selecting one of the Below Models:"))
         self.menuTopics.setTitle(_translate("MainWindow", "Topics"))
         self.menuSettings.setTitle(_translate("MainWindow", "Settings"))
         self.menuControls.setTitle(_translate("MainWindow", "Controls"))
@@ -1979,7 +2023,7 @@ class UI_MainWindow(object):
         self.action_HeadingResearch.setToolTip(_translate("MainWindow", "Heading Research"))
         self.action_UserGuide.setText(_translate("MainWindow", "User Guide"))
         self.action_UserGuide.setToolTip(_translate("MainWindow", "Help"))
-       #**************************************************************************
+        #**************************************************************************
         self.menu_PreRequisites.setTitle(_translate("MainWindow", "Pre Requisites"))  #*******************************
         self.menu_FundamentalOfComputerVision.setTitle(_translate("MainWindow", "Fundamental of Computer Vision"))  #****************************
         self.menu_Machine_Learning_Model_Fundamentals.setTitle(_translate("MainWindow", "Machine Learning Model Fundamentals"))  #*******************************
@@ -1995,4 +2039,5 @@ class UI_MainWindow(object):
         self.action_UploadStyles.setText(_translate("MainWindow", "⏫ Upload Styles"))
         self.action_UploadVideos.setText(_translate("MainWindow", "📤 Upload Videos"))
         self.action_UploadClassifiers.setText(_translate("MainWindow", "⏏️ Upload Classifiers"))
+        self.action_UploadStyleTransferModels.setText(_translate("MainWindow", "🔽 Upload Style Transfer Models"))
 

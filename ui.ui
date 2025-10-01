@@ -4229,9 +4229,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>380</y>
+        <y>410</y>
         <width>981</width>
-        <height>301</height>
+        <height>271</height>
        </rect>
       </property>
      </widget>
@@ -4451,19 +4451,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </item>
       </layout>
      </widget>
-     <widget class="QPushButton" name="pushButton_TransferStyle_NeuralStyleTransfer">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>330</y>
-        <width>981</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Tranfer selected Style to the Selected Image</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_Sync_NeuralStyleTransfer">
       <property name="geometry">
        <rect>
@@ -4510,6 +4497,82 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="alignment">
        <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_TransferStyle_NeuralStyleTransfer">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>370</y>
+        <width>981</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>candy.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>composition_vii.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>feathers.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>la_muse.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>mosaic.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>starry_night.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>the_scream.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>the_wave.t7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>udnie.t7</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>330</y>
+        <width>981</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Tranfer selected Style to the Selected Image by Selecting one of the Below Models:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
       </property>
      </widget>
     </widget>
@@ -4597,6 +4660,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <addaction name="action_UploadImages"/>
     <addaction name="separator"/>
     <addaction name="action_UploadStyles"/>
+    <addaction name="separator"/>
+    <addaction name="action_UploadStyleTransferModels"/>
    </widget>
    <widget class="QMenu" name="menuControls">
     <property name="font">
@@ -4843,6 +4908,11 @@ Portfolios</string>
   <action name="action_UploadClassifiers">
    <property name="text">
     <string>⏏️ Upload Classifiers</string>
+   </property>
+  </action>
+  <action name="action_UploadStyleTransferModels">
+   <property name="text">
+    <string>🔽 Upload Style Transfer Models</string>
    </property>
   </action>
  </widget>

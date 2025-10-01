@@ -408,287 +408,6 @@ class MainWindow(QMainWindow):
                     option.setDisabled(True)
                     option.setEnabled(False)
 
-    def messageBox(self,type,title,contents):
-          match type:
-              case "red":
-                  QMessageBox.critical(self, title, contents)
-              case "blue":
-                  QMessageBox.information(self, title, contents)
-              case "yellow":
-                  QMessageBox.warning(self, title, contents)
-
-    def closeWindow(self):
-        match self.sender().objectName():
-             case "action_CloseOtherWindows":
-                  self.lower()
-                  cv2.destroyAllWindows()
-             case "action_CloseMainWindow":
-                  self.close()
-                  self.destroy()
-             case "action_CloseAllWindows":
-                  self.lower()
-                  cv2.destroyAllWindows()
-                  self.close()
-                  self.destroy()
-
-    def Load_Html_File(self,file_path):
-        with open(file_path, 'r') as f: #, encoding='utf-8'
-            return f.read()
-
-    def On_Cert_Error(self,e):
-            # print(f"cert error: {e.description()}")
-            # print(f"type: {e.type()}")
-            # print(f"overridable: {e.isOverridable()}")
-            # print(f"url: {e.url()}")
-            # for c in e.certificateChain():
-            #     print(c.toText())
-            e.acceptCertificate()
-            e.ignoreCertificateError()
-            return True
-
-    def CheckCreateDefaultFolders(self):
-            base = os.path.normpath("resources")
-            if os.path.isdir(base):
-                pass
-            else:
-                os.makedirs(base, exist_ok=True)
-            images = os.path.normpath(join("resources","images"))
-            models = os.path.normpath(join("resources","models"))
-            styles = os.path.normpath(join("resources","styles"))
-            videos = os.path.normpath(join("resources","videos"))
-            temp = os.path.normpath("temp")
-            faces = os.path.normpath("resources/images/faces")
-            haarcascades = os.path.normpath(join("resources","haarcascades"))
-            if os.path.isdir(images):
-                pass
-            else:
-                os.makedirs(images, exist_ok=True)
-            if os.path.isdir(models):
-                pass
-            else:
-                os.makedirs(models, exist_ok=True)
-            if os.path.isdir(styles):
-                pass
-            else:
-                os.makedirs(styles, exist_ok=True)
-            if os.path.isdir(videos):
-                pass
-            else:
-                os.makedirs(videos, exist_ok=True)
-            if os.path.isdir(haarcascades):
-                pass
-            else:
-                os.makedirs(haarcascades, exist_ok=True)
-            if os.path.isdir(temp):
-                pass
-            else:
-                os.makedirs(temp, exist_ok=True)
-            if os.path.isdir(faces):
-                pass
-            else:
-                os.makedirs(faces, exist_ok=True)
-
-    def Upload_Files(self,name):
-          self.CheckCreateDefaultFolders()
-          destination_folder = os.path.normpath("resources")
-          sender = self.sender().objectName() 
-          file_paths, _ = QFileDialog.getOpenFileNames(self, "Select File", "", "All Files (*);;Text Files (*.txt)")
-          if file_paths:
-               # Copy each file
-               for path in file_paths:
-                    if not path.__contains__(destination_folder):
-                        file_name = os.path.basename(path)
-
-                        if sender.__contains__("UploadModels"):
-                            if self.Is_Valid_Extension(file_name.strip(),"model"):
-                               destination_folder = os.path.normpath(join("resources","models"))
-                            else:
-                                QMessageBox.critical(None, "Model Extension Error: " + file_name, "Valid Extensions: " + " keras , h5 ")
-                                continue
-                            
-                        if sender.__contains__("UploadImages"):
-                            if self.Is_Valid_Extension(file_name.strip(),"image"):
-                               destination_folder = os.path.normpath(join("resources","images"))
-                            else:
-                                QMessageBox.critical(None, "Image Extension Error: " + file_name, "Valid Extensions: " + " jpg , jpeg , png , gif , bmp , psd ")
-                                continue
-
-                        if sender.__contains__("UploadStyles"):
-                            destination_folder = os.path.normpath(join("resources","styles"))
-
-                        if sender.__contains__("UploadVideos"):
-                            if self.Is_Valid_Extension(file_name.strip(),"video"):
-                               destination_folder = os.path.normpath(join("resources","Videos"))
-                            else:
-                                QMessageBox.critical(None, "Video Extension Error: " + file_name, "Valid Extensions: " + " avi , mp4 , mpg , mpeg , mov , wmv , mkv , flv ")
-                                continue
-
-                        if sender.__contains__("FaceRecognitionOperation"):
-                            if self.Is_Valid_Extension(file_name.strip(),"image"):
-                               new_name = ""
-                               if name.strip() != "":
-                                  new_name = name +  file_name[file_name.rindex("."):]
-                               else:
-                                   new_name = file_name
-
-                               new_path = os.path.normpath("resources/images/faces/" + new_name)
-                               self.UploadFaceImage(path,new_path)
-                               return
-                            else:
-                                QMessageBox.critical(None, "Image Extension Error: " + file_name, "Valid Extensions: " + " jpg , jpeg , png , gif , bmp , psd ")
-                                continue
-
-                        dest_path = os.path.join(destination_folder, file_name)
-                        if destination_folder != os.path.normpath("resources"):
-                           shutil.copy2(path, dest_path)
-
-               self.LoadResources()
-               # print(f"Selected file: {file_paths}")
-
-    def Html_In_Window(self,path):
-        #  path = os.path.abspath(path)
-        self.webView.setUrl(QUrl(path))
-        #self.webView.load(QUrl.fromLocalFile(path))
-        self.webView.show()
-
-    def Is_Valid_Extension(self,file_name,file_type):
-        match file_type:
-             case "image":
-                  valid_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp','.psd'}
-             case "video":
-                  valid_extensions = {'.avi','.mp4','.mpg','.mpeg','.mov','.WMV','.MKV','.FLV'}
-             case "haarcascade":
-                  valid_extensions = {'.xml'}
-             case "model":
-                  valid_extensions = {'.h5','.keras', "caffemodel",".pb","prototxt","pbtxt","cfg","weights"}
-        return any(file_name.lower().endswith(extension) for extension in valid_extensions)
-    
-    def Pdf_In_Browser(self,pdf_path,local):
-        if local == True:
-           pdf_path = os.path.relpath(pdf_path)
-           QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(pdf_path))
-        else:
-            QDesktopServices.openUrl(QUrl(pdf_path))
-
-    def LoadResources(self):
-        Base_Video_Path = os.path.normpath(join("resources","videos"))
-        for f in listdir(Base_Video_Path):
-            if isfile(join(Base_Video_Path, f)) and self.Is_Valid_Extension(f.strip(),"video"):
-               if self.ui.comboBox_SelectVideo.findText(f) == -1 :
-                  self.ui.comboBox_SelectVideo.addItem(f)
-               if self.ui.comboBox_SelectVideo_DeepLearningFoundation.findText(f) == -1 :
-                  self.ui.comboBox_SelectVideo_DeepLearningFoundation.addItem(f)
-               if self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.findText(f) == -1 :
-                  self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.addItem(f)
-
-        Base_Image_Path = os.path.normpath(join("resources","images"))
-        for f in listdir(Base_Image_Path):
-            if isfile(join(Base_Image_Path, f)) and self.Is_Valid_Extension(f.strip(),"image"):
-               if self.ui.comboBox_SelectImage.findText(f) == -1 :
-                  self.ui.comboBox_SelectImage.addItem(f)
-               if self.ui.comboBox_SelectImage_DeepLearningFoundation.findText(f) == -1 :
-                  self.ui.comboBox_SelectImage_DeepLearningFoundation.addItem(f)
-
-        Base_FaceImage_Path = os.path.normpath("resources/images/faces")
-        for f in listdir(Base_FaceImage_Path):
-            if isfile(join(Base_FaceImage_Path, f)) and self.Is_Valid_Extension(f.strip(),"image"):
-               if self.ui.comboBox_SelectFaceOne_Step3_FaceRecognitionOperation.findText(f) == -1 :
-                  self.ui.comboBox_SelectFaceOne_Step3_FaceRecognitionOperation.addItem(f)
-               if self.ui.comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation.findText(f) == -1 :
-                  self.ui.comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation.addItem(f)
-
-        for camera_info in enumerate_cameras(cv2.CAP_MSMF):
-             cap = f"Index: {camera_info.index}, Name: {camera_info.name}, Backend: {camera_info.backend}"
-             if self.ui.comboBox_SelectCameraDeepLearningFoundation.findText(cap) == -1 :
-                  self.ui.comboBox_SelectCameraDeepLearningFoundation.addItem(cap)
-             if self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.findText(cap) == -1 :
-                  self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.addItem(cap)
-             if self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation.findText(cap) == -1 :
-                  self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation.addItem(cap)
-
-    def FillCode(self, function, textBrowser, LineStart):
-        function_code = inspect.getsource(function)
-        lines = function_code.splitlines()[LineStart:]
-        commentCount = 0
-        ChangedContent = ""
-        for index,line in enumerate(lines):
-            #print(index)
-            stripedLine = line.strip()
-            if lines[index].strip().startswith("'''"): commentCount += 1
-            if stripedLine.startswith("#") or (commentCount % 2 != 0 or lines[index].strip().startswith("'''")):
-                line = "<span style='color: green'>" + line +"</span>" #.strip()
-            ChangedContent += line +"\n"
-        textBrowser.setHtml(("<pre>" + ChangedContent ).strip())
-        textBrowser.show()
-
-    def SaveCode(self, textBrowser):
-        # Choose file location
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;HTML Files (*.html);;All Files (*)")
-        if file_path:
-            content = ""
-            # Choose between plain text or HTML
-            if(file_path.endswith("html") or file_path.endswith("htm")):
-                content = textBrowser.toHtml()
-            else:
-                content = textBrowser.toPlainText()
-            with open(file_path, 'w', encoding='utf-8') as file:
-                    file.write(content)
-    
-    def changePage(self):
-        cv2.destroyAllWindows()
-        selectedPage = self.ui.pages.findChild(QtWidgets.QWidget,"page_" + self.sender().objectName().split("_")[1])
-        if selectedPage != None:
-           self.ui.pages.setCurrentWidget(selectedPage)
-  
-    def changePDFPage(self,index):
-        cv2.destroyAllWindows()
-        self.ui.pages.setCurrentWidget(self.pdf_view)
-        self.pdf_path = ""
-        match index:
-             case 0:
-                  self.pdf_path = os.path.relpath("pages/BigPicture.pdf")
-             case 1:
-                  self.pdf_path = os.path.relpath("pages/UniversityCurriculum.pdf")
-             case 2:
-                  self.pdf_path = os.path.relpath("pages/RoadMap.pdf")
-             case 3:
-                  self.pdf_path = os.path.relpath("pages/StudyPlan.pdf")
-             case 4:
-                  self.pdf_path = os.path.relpath("pages/HeadingResearch.pdf")
-             case 5:
-                  self.pdf_path = os.path.relpath("pages/UserGuide.pdf")
-             case 6:
-                  self.pdf_path = os.path.relpath("pages/ML_BigPicture.pdf")
-             case 7:
-                  self.pdf_path = os.path.relpath("pages/CategorizingByLearningParadigm.pdf")
-             case 8:
-                  self.pdf_path = os.path.relpath("pages/FromFundamentalsToAdvanced.pdf")
-             case 9:
-                  self.pdf_path = os.path.relpath("pages/CodeSamplesByLearningParadigm.pdf")
-             case 10:
-                  self.pdf_path = os.path.relpath("pages/DeeperCodeSamplesWithDefinitions.pdf")
-             case 11:
-                  self.pdf_path = os.path.relpath("pages/TheoreticalFoundationsOfComputerVision.pdf")
-             case 12:
-                  self.pdf_path = os.path.relpath("pages/Numpy_Sheet.pdf")
-             case 13:
-                  self.pdf_path = os.path.relpath("pages/Pandas_Sheet.pdf")
-             case 14:
-                  self.pdf_path = os.path.relpath("pages/MatPlotLib_Sheet.pdf")
-             case 15:
-                  self.pdf_path = os.path.relpath("pages/SeaBorn_Sheet.pdf")
-             case 16:
-                  self.pdf_path = os.path.relpath("pages/SupervisedML_Process.pdf")
-             case 17:
-                  self.pdf_path = os.path.relpath("pages/TheoreticalDeepLearningFoundation.pdf")
-
-        self.pdf_document.load(self.pdf_path)
-        self.pdf_view.pdf_path = self.pdf_path
-        self.pdf_view.setDocument(self.pdf_document)
-        self.pdf_view.pdf_document = self.pdf_document
-        self.pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
-        self.pdf_view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
-      
     def PrepareSelectVideo(self,comboBox,VideoName):
         self.ResetComboBoxSelections(comboBox)
         self.ResetParams("SelectVideo")
@@ -850,6 +569,37 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.warning(None,"Haarcascade not found","haarcascade_frontalface_default.xml File not found in: resources/haarcascades Path")
 
+    def SyncSize_NeuralStyleTransfer(self, value):
+        self.ui.label_SyncSize_NeuralStyleTransfer.setText(str(value))
+        if self.NeuralStyleTransferHandler.image is not None and self.NeuralStyleTransferHandler.style is not None:
+            self.NeuralStyleTransferHandler.SyncImageStyleSize(value)
+        else:
+            QMessageBox.warning(None, "No Image/Style","First, Select an Image and a Style.")
+
+    def dial_RedValue_Changed_NeuralStyleTransfer(self, value):
+        self.ui.label_RedValue_NeuralStyleTransfer.setText(str(value))
+
+    def dial_GreenValue_Changed_NeuralStyleTransfer(self, value):
+        self.ui.label_GreenValue_NeuralStyleTransfer.setText(str(value))
+
+    def dial_BlueValue_Changed_NeuralStyleTransfer(self, value):
+        self.ui.label_BlueValue_NeuralStyleTransfer.setText(str(value))
+    
+    def SelectImage_NeuralStyleTransfer(self, ImageName):
+        if ImageName.strip() != "":
+            self.ui.comboBox_SelectStyle_NeuralStyleTransfer.setCurrentIndex(0)
+            self.NeuralStyleTransferHandler.SelectShowImage(ImageName)
+
+    def PrepareTransferStyle(self, ModelName):
+        if ModelName.strip() != "":
+           if self.NeuralStyleTransferHandler.image is not None and self.NeuralStyleTransferHandler.style is not None:
+                RedValue = self.ui.dial_Red_NeuralStyleTransfer.value()
+                GreenValue = self.ui.dial_Green_NeuralStyleTransfer.value()
+                BlueValue = self.ui.dial_Blue_NeuralStyleTransfer.value()
+                self.NeuralStyleTransferHandler.TransferStyle(ModelName,RedValue,GreenValue,BlueValue)
+           else:
+                QMessageBox.warning(None, "No Image/Style","First, Select an Image and a Style.")
+
     def LoadFramePdf(self, filename):
         pdfpath = "pages/" + filename
         self.pdf_path = os.path.relpath(pdfpath)
@@ -871,6 +621,319 @@ class MainWindow(QMainWindow):
                     combo.setCurrentIndex(0)
                     combo.blockSignals(False)            
             
+    def messageBox(self,type,title,contents):
+          match type:
+              case "red":
+                  QMessageBox.critical(self, title, contents)
+              case "blue":
+                  QMessageBox.information(self, title, contents)
+              case "yellow":
+                  QMessageBox.warning(self, title, contents)
+
+    def closeWindow(self):
+        match self.sender().objectName():
+             case "action_CloseOtherWindows":
+                  self.lower()
+                  cv2.destroyAllWindows()
+             case "action_CloseMainWindow":
+                  self.close()
+                  self.destroy()
+             case "action_CloseAllWindows":
+                  self.lower()
+                  cv2.destroyAllWindows()
+                  self.close()
+                  self.destroy()
+
+    def Load_Html_File(self,file_path):
+        with open(file_path, 'r') as f: #, encoding='utf-8'
+            return f.read()
+
+    def On_Cert_Error(self,e):
+            # print(f"cert error: {e.description()}")
+            # print(f"type: {e.type()}")
+            # print(f"overridable: {e.isOverridable()}")
+            # print(f"url: {e.url()}")
+            # for c in e.certificateChain():
+            #     print(c.toText())
+            e.acceptCertificate()
+            e.ignoreCertificateError()
+            return True
+
+    def CheckCreateDefaultFolders(self):
+            base = os.path.normpath("resources")
+            if os.path.isdir(base):
+                pass
+            else:
+                os.makedirs(base, exist_ok=True)
+            images = os.path.normpath(join("resources","images"))
+            models = os.path.normpath(join("resources","models"))
+            styles = os.path.normpath(join("resources","styles"))
+            style_transfer_models = os.path.normpath(join("resources","style_transfer_models"))
+            videos = os.path.normpath(join("resources","videos"))
+            temp = os.path.normpath("temp")
+            faces = os.path.normpath("resources/images/faces")
+            haarcascades = os.path.normpath(join("resources","haarcascades"))
+            if os.path.isdir(images):
+                pass
+            else:
+                os.makedirs(images, exist_ok=True)
+            if os.path.isdir(models):
+                pass
+            else:
+                os.makedirs(models, exist_ok=True)
+            if os.path.isdir(styles):
+                pass
+            else:
+                os.makedirs(styles, exist_ok=True)
+            if os.path.isdir(videos):
+                pass
+            else:
+                os.makedirs(videos, exist_ok=True)
+            if os.path.isdir(haarcascades):
+                pass
+            else:
+                os.makedirs(haarcascades, exist_ok=True)
+            if os.path.isdir(temp):
+                pass
+            else:
+                os.makedirs(temp, exist_ok=True)
+            if os.path.isdir(faces):
+                pass
+            else:
+                os.makedirs(faces, exist_ok=True)
+            if os.path.isdir(style_transfer_models):
+                pass
+            else:
+                os.makedirs(style_transfer_models, exist_ok=True)
+
+    def Upload_Files(self,name):
+          self.CheckCreateDefaultFolders()
+          destination_folder = os.path.normpath("resources")
+          sender = self.sender().objectName() 
+          file_paths, _ = QFileDialog.getOpenFileNames(self, "Select File", "", "All Files (*);;Text Files (*.txt)")
+          if file_paths:
+               # Copy each file
+               for path in file_paths:
+                    if not path.__contains__(destination_folder):
+                        file_name = os.path.basename(path)
+
+                        if sender.__contains__("UploadModels"):
+                            if self.Is_Valid_Extension(file_name.strip(),"model"):
+                               destination_folder = os.path.normpath(join("resources","models"))
+                            else:
+                                QMessageBox.critical(None, "Model Extension Error: " + file_name, "Valid Extensions: " + " keras , h5 ")
+                                continue
+                            
+                        if sender.__contains__("UploadImages"):
+                            if self.Is_Valid_Extension(file_name.strip(),"image"):
+                               destination_folder = os.path.normpath(join("resources","images"))
+                            else:
+                                QMessageBox.critical(None, "Image Extension Error: " + file_name, "Valid Extensions: " + " jpg , jpeg , png , gif , bmp , psd ")
+                                continue
+
+                        if sender.__contains__("UploadStyles"):
+                            destination_folder = os.path.normpath(join("resources","styles"))
+
+                        if sender.__contains__("UploadVideos"):
+                            if self.Is_Valid_Extension(file_name.strip(),"video"):
+                               destination_folder = os.path.normpath(join("resources","Videos"))
+                            else:
+                                QMessageBox.critical(None, "Video Extension Error: " + file_name, "Valid Extensions: " + " avi , mp4 , mpg , mpeg , mov , wmv , mkv , flv ")
+                                continue
+
+                        if sender.__contains__("FaceRecognitionOperation"):
+                            if self.Is_Valid_Extension(file_name.strip(),"image"):
+                               new_name = ""
+                               if name.strip() != "":
+                                  new_name = name +  file_name[file_name.rindex("."):]
+                               else:
+                                   new_name = file_name
+
+                               new_path = os.path.normpath("resources/images/faces/" + new_name)
+                               self.UploadFaceImage(path,new_path)
+                               return
+                            else:
+                                QMessageBox.critical(None, "Image Extension Error: " + file_name, "Valid Extensions: " + " jpg , jpeg , png , gif , bmp , psd ")
+                                continue
+
+                        if sender.__contains__("UploadStyles"):
+                            if self.Is_Valid_Extension(file_name.strip(),"style"):
+                               destination_folder = os.path.normpath(join("resources","styles"))
+                            else:
+                                QMessageBox.critical(None, "Image Extension Error: " + file_name, "Valid Extensions: " + " jpg , jpeg , png , gif , bmp , psd ")
+                                continue
+                      
+                        if sender.__contains__("UploadStyleTransferModels"):
+                            if self.Is_Valid_Extension(file_name.strip(),"style_transfer_model"):
+                                destination_folder = os.path.normpath(join("resources","style_transfer_models"))
+                        else:
+                            QMessageBox.critical(None, "Image Extension Error: " + file_name, "Valid Extensions: " + " t7 ")
+                            continue
+
+                        dest_path = os.path.join(destination_folder, file_name)
+                        if destination_folder != os.path.normpath("resources"):
+                           shutil.copy2(path, dest_path)
+
+               self.LoadResources()
+               # print(f"Selected file: {file_paths}")
+
+    def Html_In_Window(self,path):
+        #  path = os.path.abspath(path)
+        self.webView.setUrl(QUrl(path))
+        #self.webView.load(QUrl.fromLocalFile(path))
+        self.webView.show()
+
+    def Is_Valid_Extension(self,file_name,file_type):
+        match file_type:
+             case "image":
+                  valid_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp','.psd'}
+             case "video":
+                  valid_extensions = {'.avi','.mp4','.mpg','.mpeg','.mov','.WMV','.MKV','.FLV'}
+             case "haarcascade":
+                  valid_extensions = {'.xml'}
+             case "model":
+                  valid_extensions = {'.h5','.keras', ".caffemodel",".pb",".prototxt",".pbtxt",".cfg",".weights",".t7"}
+             case "style":
+                  valid_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp','.psd'}
+             case "style_transfer_model":
+                  valid_extensions = {'.t7'}
+        
+        return any(file_name.lower().endswith(extension) for extension in valid_extensions)
+    
+    def Pdf_In_Browser(self,pdf_path,local):
+        if local == True:
+           pdf_path = os.path.relpath(pdf_path)
+           QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(pdf_path))
+        else:
+            QDesktopServices.openUrl(QUrl(pdf_path))
+
+    def LoadResources(self):
+        Base_Video_Path = os.path.normpath(join("resources","videos"))
+        for f in listdir(Base_Video_Path):
+            if isfile(join(Base_Video_Path, f)) and self.Is_Valid_Extension(f.strip(),"video"):
+               if self.ui.comboBox_SelectVideo.findText(f) == -1 :
+                  self.ui.comboBox_SelectVideo.addItem(f)
+               if self.ui.comboBox_SelectVideo_DeepLearningFoundation.findText(f) == -1 :
+                  self.ui.comboBox_SelectVideo_DeepLearningFoundation.addItem(f)
+               if self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.findText(f) == -1 :
+                  self.ui.comboBox_SelectVideo_Step5_FaceRecognitionOperation.addItem(f)
+
+        Base_Image_Path = os.path.normpath(join("resources","images"))
+        for f in listdir(Base_Image_Path):
+            if isfile(join(Base_Image_Path, f)) and self.Is_Valid_Extension(f.strip(),"image"):
+               if self.ui.comboBox_SelectImage.findText(f) == -1 :
+                  self.ui.comboBox_SelectImage.addItem(f)
+               if self.ui.comboBox_SelectImage_DeepLearningFoundation.findText(f) == -1 :
+                  self.ui.comboBox_SelectImage_DeepLearningFoundation.addItem(f)
+               if self.ui.comboBox_SelectImage_NeuralStyleTransfer.findText(f) == -1 :
+                  self.ui.comboBox_SelectImage_NeuralStyleTransfer.addItem(f)
+
+        Base_FaceImage_Path = os.path.normpath("resources/images/faces")
+        for f in listdir(Base_FaceImage_Path):
+            if isfile(join(Base_FaceImage_Path, f)) and self.Is_Valid_Extension(f.strip(),"image"):
+               if self.ui.comboBox_SelectFaceOne_Step3_FaceRecognitionOperation.findText(f) == -1 :
+                  self.ui.comboBox_SelectFaceOne_Step3_FaceRecognitionOperation.addItem(f)
+               if self.ui.comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation.findText(f) == -1 :
+                  self.ui.comboBox_SelectFaceTwo_Step3_FaceRecognitionOperation.addItem(f)
+
+        Base_Style_Path = os.path.normpath(join("resources","styles"))
+        for f in listdir(Base_Style_Path):
+            if isfile(join(Base_Style_Path, f)) and self.Is_Valid_Extension(f.strip(),"style"):
+               if self.ui.comboBox_SelectStyle_NeuralStyleTransfer.findText(f) == -1 :
+                  self.ui.comboBox_SelectStyle_NeuralStyleTransfer.addItem(f)
+
+        for camera_info in enumerate_cameras(cv2.CAP_MSMF):
+             cap = f"Index: {camera_info.index}, Name: {camera_info.name}, Backend: {camera_info.backend}"
+             if self.ui.comboBox_SelectCameraDeepLearningFoundation.findText(cap) == -1 :
+                  self.ui.comboBox_SelectCameraDeepLearningFoundation.addItem(cap)
+             if self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.findText(cap) == -1 :
+                  self.ui.comboBox_SelectCameraStep1CreateSimpleCNN2.addItem(cap)
+             if self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation.findText(cap) == -1 :
+                  self.ui.comboBox_SelectCamera_Step4_FaceRecognitionOperation.addItem(cap)
+
+    def FillCode(self, function, textBrowser, LineStart):
+        function_code = inspect.getsource(function)
+        lines = function_code.splitlines()[LineStart:]
+        commentCount = 0
+        ChangedContent = ""
+        for index,line in enumerate(lines):
+            #print(index)
+            stripedLine = line.strip()
+            if lines[index].strip().startswith("'''"): commentCount += 1
+            if stripedLine.startswith("#") or (commentCount % 2 != 0 or lines[index].strip().startswith("'''")):
+                line = "<span style='color: green'>" + line +"</span>" #.strip()
+            ChangedContent += line +"\n"
+        textBrowser.setHtml(("<pre>" + ChangedContent ).strip())
+        textBrowser.show()
+
+    def SaveCode(self, textBrowser):
+        # Choose file location
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Text Files (*.txt);;HTML Files (*.html);;All Files (*)")
+        if file_path:
+            content = ""
+            # Choose between plain text or HTML
+            if(file_path.endswith("html") or file_path.endswith("htm")):
+                content = textBrowser.toHtml()
+            else:
+                content = textBrowser.toPlainText()
+            with open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(content)
+    
+    def changePage(self):
+        cv2.destroyAllWindows()
+        selectedPage = self.ui.pages.findChild(QtWidgets.QWidget,"page_" + self.sender().objectName().split("_")[1])
+        if selectedPage != None:
+           self.ui.pages.setCurrentWidget(selectedPage)
+  
+    def changePDFPage(self,index):
+        cv2.destroyAllWindows()
+        self.ui.pages.setCurrentWidget(self.pdf_view)
+        self.pdf_path = ""
+        match index:
+             case 0:
+                  self.pdf_path = os.path.relpath("pages/BigPicture.pdf")
+             case 1:
+                  self.pdf_path = os.path.relpath("pages/UniversityCurriculum.pdf")
+             case 2:
+                  self.pdf_path = os.path.relpath("pages/RoadMap.pdf")
+             case 3:
+                  self.pdf_path = os.path.relpath("pages/StudyPlan.pdf")
+             case 4:
+                  self.pdf_path = os.path.relpath("pages/HeadingResearch.pdf")
+             case 5:
+                  self.pdf_path = os.path.relpath("pages/UserGuide.pdf")
+             case 6:
+                  self.pdf_path = os.path.relpath("pages/ML_BigPicture.pdf")
+             case 7:
+                  self.pdf_path = os.path.relpath("pages/CategorizingByLearningParadigm.pdf")
+             case 8:
+                  self.pdf_path = os.path.relpath("pages/FromFundamentalsToAdvanced.pdf")
+             case 9:
+                  self.pdf_path = os.path.relpath("pages/CodeSamplesByLearningParadigm.pdf")
+             case 10:
+                  self.pdf_path = os.path.relpath("pages/DeeperCodeSamplesWithDefinitions.pdf")
+             case 11:
+                  self.pdf_path = os.path.relpath("pages/TheoreticalFoundationsOfComputerVision.pdf")
+             case 12:
+                  self.pdf_path = os.path.relpath("pages/Numpy_Sheet.pdf")
+             case 13:
+                  self.pdf_path = os.path.relpath("pages/Pandas_Sheet.pdf")
+             case 14:
+                  self.pdf_path = os.path.relpath("pages/MatPlotLib_Sheet.pdf")
+             case 15:
+                  self.pdf_path = os.path.relpath("pages/SeaBorn_Sheet.pdf")
+             case 16:
+                  self.pdf_path = os.path.relpath("pages/SupervisedML_Process.pdf")
+             case 17:
+                  self.pdf_path = os.path.relpath("pages/TheoreticalDeepLearningFoundation.pdf")
+
+        self.pdf_document.load(self.pdf_path)
+        self.pdf_view.pdf_path = self.pdf_path
+        self.pdf_view.setDocument(self.pdf_document)
+        self.pdf_view.pdf_document = self.pdf_document
+        self.pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
+        self.pdf_view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+
     def ResetParams(self,text):
         self.lower()
         cv2.destroyAllWindows()
@@ -1000,6 +1063,14 @@ class MainWindow(QMainWindow):
         self.ui.dial_Z2.blockSignals(False)
 
     def ConnectActions(self):
+        self.ui.comboBox_TransferStyle_NeuralStyleTransfer.currentTextChanged.connect(self.PrepareTransferStyle)
+        self.ui.comboBox_SelectStyle_NeuralStyleTransfer.currentTextChanged.connect(self.NeuralStyleTransferHandler.SelectShowStyle)
+        self.ui.comboBox_SelectImage_NeuralStyleTransfer.currentTextChanged.connect(self.SelectImage_NeuralStyleTransfer)
+        self.ui.horizontalSlider_Sync_NeuralStyleTransfer.valueChanged.connect(self.SyncSize_NeuralStyleTransfer)
+        self.ui.dial_Red_NeuralStyleTransfer.valueChanged.connect(self.dial_RedValue_Changed_NeuralStyleTransfer)
+        self.ui.dial_Green_NeuralStyleTransfer.valueChanged.connect(self.dial_GreenValue_Changed_NeuralStyleTransfer)
+        self.ui.dial_Blue_NeuralStyleTransfer.valueChanged.connect(self.dial_BlueValue_Changed_NeuralStyleTransfer)
+
         self.ui.action_BigPicture.triggered.connect(partial(self.changePDFPage,0))
         self.ui.action_UniversityCurriculum.triggered.connect(partial(self.changePDFPage,1))
         self.ui.action_RoadMap.triggered.connect(partial(self.changePDFPage,2))
@@ -1045,6 +1116,9 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_UploadVideos.clicked.connect(self.Upload_Files)
         self.ui.pushButton_UploadImages_DeepLearningFoundation.clicked.connect(self.Upload_Files)
         self.ui.pushButton_UploadVideos_DeepLearningFoundation.clicked.connect(self.Upload_Files)  
+        self.ui.pushButton_UploadImages_NeuralStyleTransfer.clicked.connect(self.Upload_Files)
+        self.ui.pushButton_UploadStyles_NeuralStyleTransfer.clicked.connect(self.Upload_Files)
+        self.ui.action_UploadStyleTransferModels.triggered.connect(self.Upload_Files)
 
         self.ui.pushButton_SaveCode_TransferLearning.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_TransferLearning))
         self.ui.pushButton_SaveCode.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_ImageAndColors))
@@ -1056,6 +1130,7 @@ class MainWindow(QMainWindow):
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
+        self.ui.pushButton_SaveImage_NeuralStyleTransfer.clicked.connect(self.NeuralStyleTransferHandler.SaveImage)
         self.ui.horizontalSlider_SkewHeight.valueChanged.connect(self.PrepareSkewImage)
         self.ui.horizontalSlider_SkewWidth.valueChanged.connect(self.PrepareSkewImage)
         self.ui.horizontalSlider_ResizeHeight.valueChanged.connect(self.PrepareResizeImage)
@@ -1309,7 +1384,7 @@ class MainWindow(QMainWindow):
         self.FillCode(CreateHandGestureRecognitionCNN,self.ui.textBrowser_CreateSimpleCNN2, 26)
         self.FillCode(FaceRecognitionOperation,self.ui.textBrowser_FaceRecognitionOperation, 22)
         self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
-        self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 16)
+        self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
 
 def LunchApp():
     import sys
