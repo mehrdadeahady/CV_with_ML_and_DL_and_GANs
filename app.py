@@ -87,7 +87,16 @@ class MainWindow(QMainWindow):
         self.action_FaceRecognitionOperation.setText(_translate("MainWindow","🧑🏻‍🦱 Face Recognition Operation"))
         self.action_TransferLearning.setText(_translate("MainWindow","🔂 Transfer Learning"))
         self.action_NeuralStyleTransfer.setText(_translate("MainWindow","🏊 Neural Style Transfer"))
-
+        self.menu_PracticalGANsDeploymentOptimization.setTitle(_translate("MainWindow","🛠 Practical"))
+        self.menu_PracticalGANs.setTitle(_translate("MainWindow","🛠 Practical"))
+        self.menu_TheoreticalGANsDeploymentOptimization.setTitle(_translate("MainWindow","📖 Theoretical"))
+        self.menu_TheoreticalGANs.setTitle(_translate("MainWindow","📖 Theoretical"))
+        self.action_TheoreticalGANsDeploymentOptimization.setText(_translate("MainWindow","✅ Deployment and Optimization"))
+        self.action_TheoreticalGANsSource1.setText(_translate("MainWindow","🧱 GANs Architecture Source1"))
+        self.action_TheoreticalGANsSource2.setText(_translate("MainWindow","🧱 GANs Architecture Source2"))
+        self.action_TheoreticalGANsSource3.setText(_translate("MainWindow","🧱 GANs Architecture Source3"))
+        self.action_TheoreticalGANsSource4.setText(_translate("MainWindow","🧱 GANs Architecture Source4"))
+        
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
 
@@ -926,7 +935,17 @@ class MainWindow(QMainWindow):
                   self.pdf_path = os.path.relpath("pages/SupervisedML_Process.pdf")
              case 17:
                   self.pdf_path = os.path.relpath("pages/TheoreticalDeepLearningFoundation.pdf")
-
+             case 18:
+                  self.pdf_path = os.path.relpath("pages/GANs1.pdf")
+             case 19:
+                  self.pdf_path = os.path.relpath("pages/GANs2.pdf")
+             case 20:
+                  self.pdf_path = os.path.relpath("pages/GANs3.pdf")
+             case 21:
+                  self.pdf_path = os.path.relpath("pages/GANs4.pdf")
+             case 22:
+                  self.pdf_path = os.path.relpath("pages/GANs.pdf")
+        
         self.pdf_document.load(self.pdf_path)
         self.pdf_view.pdf_path = self.pdf_path
         self.pdf_view.setDocument(self.pdf_document)
@@ -1089,6 +1108,11 @@ class MainWindow(QMainWindow):
         self.action_SeaBorn.triggered.connect(partial(self.changePDFPage,15))
         self.action_SupervisedMLProcess.triggered.connect(partial(self.changePDFPage,16))
         self.action_TheoreticalDeepLearningFoundation.triggered.connect(partial(self.changePDFPage,17))
+        self.action_TheoreticalGANsSource1.triggered.connect(partial(self.changePDFPage,18))
+        self.action_TheoreticalGANsSource2.triggered.connect(partial(self.changePDFPage,19))
+        self.action_TheoreticalGANsSource3.triggered.connect(partial(self.changePDFPage,20))
+        self.action_TheoreticalGANsSource4.triggered.connect(partial(self.changePDFPage,21))
+        self.action_TheoreticalGANsDeploymentOptimization.triggered.connect(partial(self.changePDFPage,22))
 
         self.ui.action_AboutTool.triggered.connect(self.changePage)
         self.ui.action_AboutAuthorDeveloper.triggered.connect(self.changePage)
@@ -1353,6 +1377,35 @@ class MainWindow(QMainWindow):
         self.action_NeuralStyleTransfer = QtGui.QAction(parent=self)
         self.action_NeuralStyleTransfer.setObjectName("action_NeuralStyleTransfer")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_NeuralStyleTransfer)
+
+        self.menu_TheoreticalGANs = QMenu(parent=self)
+        self.menu_TheoreticalGANs.setObjectName("menu_TheoreticalGANs")
+        self.ui.menu_Advanced_Generative_Models_Architectures.addMenu(self.menu_TheoreticalGANs)
+        self.menu_PracticalGANs = QMenu(parent=self)
+        self.menu_PracticalGANs.setObjectName("menu_PracticalGANs")
+        self.ui.menu_Advanced_Generative_Models_Architectures.addMenu(self.menu_PracticalGANs)
+        self.action_TheoreticalGANsSource1 = QtGui.QAction(parent=self)
+        self.action_TheoreticalGANsSource1.setObjectName("action_TheoreticalGANsSource1")
+        self.menu_TheoreticalGANs.addAction(self.action_TheoreticalGANsSource1)
+        self.action_TheoreticalGANsSource2 = QtGui.QAction(parent=self)
+        self.action_TheoreticalGANsSource2.setObjectName("action_TheoreticalGANsSource2")
+        self.menu_TheoreticalGANs.addAction(self.action_TheoreticalGANsSource2)
+        self.action_TheoreticalGANsSource3 = QtGui.QAction(parent=self)
+        self.action_TheoreticalGANsSource3.setObjectName("action_TheoreticalGANsSource3")
+        self.menu_TheoreticalGANs.addAction(self.action_TheoreticalGANsSource3)
+        self.action_TheoreticalGANsSource4 = QtGui.QAction(parent=self)
+        self.action_TheoreticalGANsSource4.setObjectName("action_TheoreticalGANsSource4")
+        self.menu_TheoreticalGANs.addAction(self.action_TheoreticalGANsSource4)
+
+        self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
+        self.menu_TheoreticalGANsDeploymentOptimization.setObjectName("menu_TheoreticalGANsDeploymentOptimization")
+        self.ui.menu_Applications_Deployment_Optimization.addMenu(self.menu_TheoreticalGANsDeploymentOptimization)
+        self.menu_PracticalGANsDeploymentOptimization = QMenu(parent=self)
+        self.menu_PracticalGANsDeploymentOptimization.setObjectName("menu_PracticalGANsDeploymentOptimization")
+        self.ui.menu_Applications_Deployment_Optimization.addMenu(self.menu_PracticalGANsDeploymentOptimization)
+        self.action_TheoreticalGANsDeploymentOptimization = QtGui.QAction(parent=self)
+        self.action_TheoreticalGANsDeploymentOptimization.setObjectName("action_TheoreticalGANsDeploymentOptimization")
+        self.menu_TheoreticalGANsDeploymentOptimization.addAction(self.action_TheoreticalGANsDeploymentOptimization)
 
         self.pdf_view = CustomPdfView(self.ui.pages)
         self.pdf_document = QPdfDocument(self.pdf_view)
