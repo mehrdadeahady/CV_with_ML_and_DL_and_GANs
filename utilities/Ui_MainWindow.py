@@ -1547,11 +1547,11 @@ class UI_MainWindow(object):
         icon10.addPixmap(QtGui.QPixmap(".\\icons/n4.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.menu_DeepLearningFoundations.setIcon(icon10)
         self.menu_DeepLearningFoundations.setObjectName("menu_DeepLearningFoundations")
-        self.menu_Core_CV_Computer_Vision_Tasks = QMenu(parent=MainWindow)  #**********************************
+        self.action_Core_CV_Computer_Vision_Tasks = QtGui.QAction(parent=MainWindow)  #**********************************
         icon11 = QtGui.QIcon()
         icon11.addPixmap(QtGui.QPixmap(".\\icons/n5.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        self.menu_Core_CV_Computer_Vision_Tasks.setIcon(icon11)
-        self.menu_Core_CV_Computer_Vision_Tasks.setObjectName("menu_Core_CV_Computer_Vision_Tasks")
+        self.action_Core_CV_Computer_Vision_Tasks.setIcon(icon11)
+        self.action_Core_CV_Computer_Vision_Tasks.setObjectName("action_Core_CV_Computer_Vision_Tasks")
         self.menu_Advanced_Generative_Models_Architectures = QMenu(parent=MainWindow)  #**********************************
         icon12 = QtGui.QIcon()
         icon12.addPixmap(QtGui.QPixmap(".\\icons/n6.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
@@ -1628,7 +1628,7 @@ class UI_MainWindow(object):
         self.menuLab.addSeparator()
         self.menuLab.addMenu(self.menu_DeepLearningFoundations) #*************************************
         self.menuLab.addSeparator()
-        self.menuLab.addMenu(self.menu_Core_CV_Computer_Vision_Tasks) #*************************************
+        self.menuLab.addAction(self.action_Core_CV_Computer_Vision_Tasks) #*************************************
         self.menuLab.addSeparator()
         self.menuLab.addMenu(self.menu_Advanced_Generative_Models_Architectures) #*************************************
         self.menuLab.addSeparator()
@@ -2028,7 +2028,7 @@ class UI_MainWindow(object):
         self.menu_FundamentalOfComputerVision.setTitle(_translate("MainWindow", "Fundamental of Computer Vision"))  #****************************
         self.menu_Machine_Learning_Model_Fundamentals.setTitle(_translate("MainWindow", "Machine Learning Model Fundamentals"))  #*******************************
         self.menu_DeepLearningFoundations.setTitle(_translate("MainWindow", "Deep Learning Foundations"))  #*******************************
-        self.menu_Core_CV_Computer_Vision_Tasks.setTitle(_translate("MainWindow", "Core CV (Computer Vision) Tasks"))  #*******************************
+        self.action_Core_CV_Computer_Vision_Tasks.setText(_translate("MainWindow", "Core CV (Computer Vision) Tasks"))  #*******************************
         self.menu_Advanced_Generative_Models_Architectures.setTitle(_translate("MainWindow", "Advanced & Generative Models & Architectures"))  #*******************************
         self.menu_Applications_Deployment_Optimization.setTitle(_translate("MainWindow", "Applications Deployment & Optimization"))  #*******************************
         self.menu_Ethics_Explainability_and_Portfolios.setTitle(_translate("MainWindow", "Ethics, Explainability, and Portfolios"))  #*******************************

@@ -945,6 +945,8 @@ class MainWindow(QMainWindow):
                   self.pdf_path = os.path.relpath("pages/GANs4.pdf")
              case 22:
                   self.pdf_path = os.path.relpath("pages/GANs.pdf")
+             case 23:
+                  self.pdf_path = os.path.relpath("pages/CoreCVTasks.pdf")
         
         self.pdf_document.load(self.pdf_path)
         self.pdf_view.pdf_path = self.pdf_path
@@ -1113,6 +1115,7 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource3.triggered.connect(partial(self.changePDFPage,20))
         self.action_TheoreticalGANsSource4.triggered.connect(partial(self.changePDFPage,21))
         self.action_TheoreticalGANsMainSource.triggered.connect(partial(self.changePDFPage,22))
+        self.ui.action_Core_CV_Computer_Vision_Tasks.triggered.connect(partial(self.changePDFPage,23))
 
         self.ui.action_AboutTool.triggered.connect(self.changePage)
         self.ui.action_AboutAuthorDeveloper.triggered.connect(self.changePage)
