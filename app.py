@@ -96,6 +96,7 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource2.setText(_translate("MainWindow","🧱 GANs Architecture Source2"))
         self.action_TheoreticalGANsSource3.setText(_translate("MainWindow","🧱 GANs Architecture Source3"))
         self.action_TheoreticalGANsSource4.setText(_translate("MainWindow","🧱 GANs Architecture Source4"))
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setText(_translate("MainWindow","☯ DL by PyTorch - Binary and Multi Category Classifications"))
         
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -1129,6 +1130,7 @@ class MainWindow(QMainWindow):
         self.action_FaceRecognitionOperation.triggered.connect(self.changePage)
         self.action_TransferLearning.triggered.connect(self.changePage)
         self.action_NeuralStyleTransfer.triggered.connect(self.changePage)
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1402,6 +1404,10 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource4 = QtGui.QAction(parent=self)
         self.action_TheoreticalGANsSource4.setObjectName("action_TheoreticalGANsSource4")
         self.menu_TheoreticalGANs.addAction(self.action_TheoreticalGANsSource4)
+
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications = QtGui.QAction(parent=self)
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setObjectName("action_DLbyPyTorchBinaryAndMultiCategoryClassifications")
+        self.menu_PracticalGANs.addAction(self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications)
 
         self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
         self.menu_TheoreticalGANsDeploymentOptimization.setObjectName("menu_TheoreticalGANsDeploymentOptimization")
