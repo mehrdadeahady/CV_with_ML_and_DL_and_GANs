@@ -10,6 +10,7 @@ from utilities.UI_MainWindow import UI_MainWindow
 from utilities.FaceRecognitionOperation import FaceRecognitionOperation
 from utilities.TransferLearning import TransferLearning
 from utilities.NeuralStyleTransfer import NeuralStyleTransfer
+from utilities.DLbyPyTorch import DLbyPyTorch
 import os
 from os import path, listdir
 from os.path import isfile, join
@@ -610,6 +611,17 @@ class MainWindow(QMainWindow):
            else:
                 QMessageBox.warning(None, "No Image/Style","First, Select an Image and a Style.")
 
+    def PrepareDownloadMINIST(self):
+        if not os.path.exists("temp/FashionMNIST") or self.get_dir_size("temp/FashionMNIST") < 84000000:
+            _ = self.CheckCreateDefaultFolders()
+            self.DLbyPyTorchHandler.DownloadMINIST()
+        else:
+            QMessageBox.information(None,"FashionMNIST Exist","Fashion-MINIST Dataset Already Downloaded.")
+
+    def Epochs_DLbyPyTorch_Change(self):
+        total_epochs = int(self.ui.comboBox_Epochs_DLbyPyTorch.currentText().strip())
+        self.DLbyPyTorchHandler.epochs = total_epochs
+
     def LoadFramePdf(self, filename):
         pdfpath = "pages/" + filename
         self.pdf_path = os.path.relpath(pdfpath)
@@ -619,6 +631,16 @@ class MainWindow(QMainWindow):
         self.frame_pdf_view.pdf_document = self.frame_pdf_document
         self.frame_pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
         self.frame_pdf_view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+
+    def get_dir_size(self,path):
+        total = 0
+        with os.scandir(path) as it:
+            for entry in it:
+                if entry.is_file():
+                    total += entry.stat().st_size
+                elif entry.is_dir():
+                    total += self.get_dir_size(entry.path)
+        return total # Bytes
 
     def ResetComboBoxSelections(self, comboBox):
         if not comboBox.objectName().__contains__("comboBox_SelectOperationDeepLearningFoundation"):
@@ -1085,6 +1107,18 @@ class MainWindow(QMainWindow):
         self.ui.dial_Z2.blockSignals(False)
 
     def ConnectActions(self):
+        self.ui.comboBox_Epochs_DLbyPyTorch.currentIndexChanged.connect(self.Epochs_DLbyPyTorch_Change)
+        self.ui.pushButton_CreateModelStep3DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.CreateBiinaryClassificationModel)
+        self.ui.pushButton_TrainModelStep3DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.TrainBiinaryClassificationModel)
+        self.ui.pushButton_CalculateAccuracyStep3DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.CalculateBiinaryClassificationModelAccuracy)
+        self.ui.pushButton_CreateModelStep5DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.CreateMultiCategoryClassificationModel)
+        self.ui.pushButton_TrainModelStep5DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.TrainMultiCategoryClassificationModel)
+        self.ui.pushButton_CalculateAccuracyStep5DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.CalculateMultiCategoryClassificationModelAccuracy)
+        self.ui.pushButton_PrepareDataStep2DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.PrepareDataForBinaryClassification)
+        self.ui.pushButton_PrepareDataStep4DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.PrepareDataForMultiCategoryClassification)
+        self.ui.pushButton_PlotMNISTStep1DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.PlotMINIST)
+        self.ui.pushButton_TestMNISTStep1DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.TestMINIST)
+        self.ui.pushButton_DownloadMNISTStep1DLbyPyTorch.clicked.connect(self.PrepareDownloadMINIST)
         self.ui.comboBox_TransferStyle_NeuralStyleTransfer.currentTextChanged.connect(self.PrepareTransferStyle)
         self.ui.comboBox_SelectStyle_NeuralStyleTransfer.currentTextChanged.connect(self.NeuralStyleTransferHandler.SelectShowStyle)
         self.ui.comboBox_SelectImage_NeuralStyleTransfer.currentTextChanged.connect(self.SelectImage_NeuralStyleTransfer)
@@ -1156,6 +1190,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode_CreateSimpleCNN2.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CreateSimpleCNN2))
         self.ui.pushButton_SaveCode__FaceRecognitionOperation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_FaceRecognitionOperation))
         self.ui.pushButton_SaveCode_NeuralStyleTransfer.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_NeuralStyleTransfer))
+        self.ui.pushButton_SaveCode_DLbyPyTorch.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DLbyPyTorch))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1255,6 +1290,7 @@ class MainWindow(QMainWindow):
         self.FaceRecognitionOperationHandler = FaceRecognitionOperation(self.ImagesAndColorsHandler,self.DLOperationsHandler)
         self.TransferLearningHandler = TransferLearning(self.DLOperationsHandler,self.CreateSimpleCNNHandler)
         self.NeuralStyleTransferHandler = NeuralStyleTransfer()
+        self.DLbyPyTorchHandler = DLbyPyTorch()
         
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
@@ -1370,6 +1406,9 @@ class MainWindow(QMainWindow):
         self.action_DeepLearningFoundationOperations = QtGui.QAction(parent=self)
         self.action_DeepLearningFoundationOperations.setObjectName("action_DeepLearningFoundationOperations")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_DeepLearningFoundationOperations)
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications = QtGui.QAction(parent=self)
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setObjectName("action_DLbyPyTorchBinaryAndMultiCategoryClassifications")
+        self.menu_PracticalDeepLearningFoundations.addAction(self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications)
         self.action_CreateHandGestureRecognItionCNN = QtGui.QAction(parent=self)
         self.action_CreateHandGestureRecognItionCNN.setObjectName("action_CreateHandGestureRecognItionCNN")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_CreateHandGestureRecognItionCNN)
@@ -1405,10 +1444,6 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource4.setObjectName("action_TheoreticalGANsSource4")
         self.menu_TheoreticalGANs.addAction(self.action_TheoreticalGANsSource4)
 
-        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications = QtGui.QAction(parent=self)
-        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setObjectName("action_DLbyPyTorchBinaryAndMultiCategoryClassifications")
-        self.menu_PracticalGANs.addAction(self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications)
-
         self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
         self.menu_TheoreticalGANsDeploymentOptimization.setObjectName("menu_TheoreticalGANsDeploymentOptimization")
         self.ui.menu_Applications_Deployment_Optimization.addMenu(self.menu_TheoreticalGANsDeploymentOptimization)
@@ -1437,6 +1472,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_Epochs_Step4CreateSimpleCNN.setCurrentIndex(1)
         self.ui.comboBox_Epochs_Step7CreateSimpleCNN2.setCurrentIndex(5)
         self.ui.comboBox_FilterAccuracy_DeepLearningFoundation.setCurrentIndex(12)
+        self.ui.comboBox_Epochs_DLbyPyTorch.setCurrentIndex(9)
         self.ui.pages.setCurrentWidget(self.ui.page_AboutTool)
         self.CheckCreateDefaultFolders()
         self.LoadResources()
@@ -1447,14 +1483,19 @@ class MainWindow(QMainWindow):
         self.FillCode(FaceRecognitionOperation,self.ui.textBrowser_FaceRecognitionOperation, 22)
         self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
         self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
+        self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
 
 def LunchApp():
     import sys
-    app = QApplication(sys.argv)
-    # app.setFont(QFont("Arial", 10))
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    if sys.version_info.major < 3 or sys.version_info.minor < 10:
+       print("You must use Python 3.10 or higher. Recommended version is Python 3.13")
+       raise Exception("You must use Python 3.10 or higher. Recommended version is Python 3.13")
+    else:
+        app = QApplication(sys.argv)
+        # app.setFont(QFont("Arial", 10))
+        window = MainWindow()
+        window.show()
+        sys.exit(app.exec())
 
 if __name__ == "__main__":
     LunchApp()
