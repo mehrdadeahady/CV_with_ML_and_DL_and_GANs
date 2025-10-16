@@ -11,6 +11,7 @@ from utilities.FaceRecognitionOperation import FaceRecognitionOperation
 from utilities.TransferLearning import TransferLearning
 from utilities.NeuralStyleTransfer import NeuralStyleTransfer
 from utilities.DLbyPyTorch import DLbyPyTorch
+from utilities.SimpleGANs import SimpleGANs
 import os
 from os import path, listdir
 from os.path import isfile, join
@@ -98,7 +99,8 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource3.setText(_translate("MainWindow","🧱 GANs Architecture Source3"))
         self.action_TheoreticalGANsSource4.setText(_translate("MainWindow","🧱 GANs Architecture Source4"))
         self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setText(_translate("MainWindow","☯ DL by PyTorch - Binary and Multi Category Classifications"))
-        
+        self.action_SimpleGANs.setText(_translate("MainWindow","🔰 Creating 2 Simple GANs"))
+
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
 
@@ -1165,6 +1167,7 @@ class MainWindow(QMainWindow):
         self.action_TransferLearning.triggered.connect(self.changePage)
         self.action_NeuralStyleTransfer.triggered.connect(self.changePage)
         self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.triggered.connect(self.changePage)
+        self.action_SimpleGANs.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1191,6 +1194,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode__FaceRecognitionOperation.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_FaceRecognitionOperation))
         self.ui.pushButton_SaveCode_NeuralStyleTransfer.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_NeuralStyleTransfer))
         self.ui.pushButton_SaveCode_DLbyPyTorch.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DLbyPyTorch))
+        self.ui.pushButton_SaveCode_SimpleGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_SimpleGANs))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1291,6 +1295,7 @@ class MainWindow(QMainWindow):
         self.TransferLearningHandler = TransferLearning(self.DLOperationsHandler,self.CreateSimpleCNNHandler)
         self.NeuralStyleTransferHandler = NeuralStyleTransfer()
         self.DLbyPyTorchHandler = DLbyPyTorch()
+        self.SimpleGANsHandler = SimpleGANs()
         
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
@@ -1406,9 +1411,6 @@ class MainWindow(QMainWindow):
         self.action_DeepLearningFoundationOperations = QtGui.QAction(parent=self)
         self.action_DeepLearningFoundationOperations.setObjectName("action_DeepLearningFoundationOperations")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_DeepLearningFoundationOperations)
-        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications = QtGui.QAction(parent=self)
-        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setObjectName("action_DLbyPyTorchBinaryAndMultiCategoryClassifications")
-        self.menu_PracticalDeepLearningFoundations.addAction(self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications)
         self.action_CreateHandGestureRecognItionCNN = QtGui.QAction(parent=self)
         self.action_CreateHandGestureRecognItionCNN.setObjectName("action_CreateHandGestureRecognItionCNN")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_CreateHandGestureRecognItionCNN)
@@ -1421,6 +1423,10 @@ class MainWindow(QMainWindow):
         self.action_NeuralStyleTransfer = QtGui.QAction(parent=self)
         self.action_NeuralStyleTransfer.setObjectName("action_NeuralStyleTransfer")
         self.menu_PracticalDeepLearningFoundations.addAction(self.action_NeuralStyleTransfer)
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications = QtGui.QAction(parent=self)
+        self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setObjectName("action_DLbyPyTorchBinaryAndMultiCategoryClassifications")
+        self.menu_PracticalDeepLearningFoundations.addAction(self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications)
+
 
         self.menu_TheoreticalGANs = QMenu(parent=self)
         self.menu_TheoreticalGANs.setObjectName("menu_TheoreticalGANs")
@@ -1443,6 +1449,10 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource4 = QtGui.QAction(parent=self)
         self.action_TheoreticalGANsSource4.setObjectName("action_TheoreticalGANsSource4")
         self.menu_TheoreticalGANs.addAction(self.action_TheoreticalGANsSource4)
+
+        self.action_SimpleGANs = QtGui.QAction(parent=self)
+        self.action_SimpleGANs.setObjectName("action_SimpleGANs")
+        self.menu_PracticalGANs.addAction(self.action_SimpleGANs)
 
         self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
         self.menu_TheoreticalGANsDeploymentOptimization.setObjectName("menu_TheoreticalGANsDeploymentOptimization")
@@ -1484,6 +1494,7 @@ class MainWindow(QMainWindow):
         self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
         self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
         self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
+        self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 27)
 
 def LunchApp():
     import sys
