@@ -5105,19 +5105,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Test Model</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_PrepareDataset_Numbers_Step1_SimpleGANs">
-      <property name="geometry">
-       <rect>
-        <x>510</x>
-        <y>230</y>
-        <width>241</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Prepare Dataset</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="pushButton_ShowDataset_Numbers_Step1_SimpleGANs">
       <property name="geometry">
        <rect>
@@ -5129,19 +5116,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="text">
        <string>Show Dataset</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_DisplayDataset_Numbers_Step1_SimpleGANs">
-      <property name="geometry">
-       <rect>
-        <x>760</x>
-        <y>230</y>
-        <width>241</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Display Dataset</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_CreateDataset_Numbers_Step1_SimpleGANs">

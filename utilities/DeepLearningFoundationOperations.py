@@ -46,7 +46,8 @@ try:
     import cv2
 except:
     print("You Should Install OpenCV-Python and cv2_enumerate_cameras Libraries")
-try:    
+try: 
+    from  PyQt6.QtGui import  QTextCursor   
     from PyQt6.QtCore import QObject, pyqtSignal,QTimer, Qt, QThread,QUrl
     from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
     from PyQt6.QtWidgets import QScrollArea,QProgressBar,QMessageBox, QFileDialog, QApplication, QDialog, QVBoxLayout, QTextEdit, QPushButton,QWidget,QLabel

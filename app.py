@@ -1109,6 +1109,20 @@ class MainWindow(QMainWindow):
         self.ui.dial_Z2.blockSignals(False)
 
     def ConnectActions(self):
+        self.ui.pushButton_TestModel_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_Shape)
+        self.ui.pushButton_TestModel_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_Numbers)
+        self.ui.pushButton_SaveModel_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_Numbers)
+        self.ui.pushButton_SaveModel_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_Shape)
+        self.ui.pushButton_CreateModels_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.CreateModels_Numbers)
+        self.ui.pushButton_TrainModels_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TrainModels_Numbers)
+        self.ui.pushButton_CreateModels_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.CreateModels_Shape)
+        self.ui.pushButton_TrainModels_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TrainModels_Shape)
+        self.ui.pushButton_DisplayDataset_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.DisplayDataset_Shape)
+        self.ui.pushButton_PrepareDataset_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.PrepareDataset_Shape)
+        self.ui.pushButton_ShowDataset_Numbers_Step1_SimpleGANs.clicked.connect(self.SimpleGANsHandler.ShowDataset_Numbers)
+        self.ui.pushButton_PlotDataset_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.PlotDataset_Shape)
+        self.ui.pushButton_CreateDataset_Numbers_Step1_SimpleGANs.clicked.connect(self.SimpleGANsHandler.CreateDataset_Numbers)
+        self.ui.pushButton_CreateDataset_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.CreateDataset_Shape)
         self.ui.comboBox_Epochs_DLbyPyTorch.currentIndexChanged.connect(self.Epochs_DLbyPyTorch_Change)
         self.ui.pushButton_CreateModelStep3DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.CreateBiinaryClassificationModel)
         self.ui.pushButton_TrainModelStep3DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.TrainBiinaryClassificationModel)
@@ -1494,7 +1508,7 @@ class MainWindow(QMainWindow):
         self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
         self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
         self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
-        self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 27)
+        self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 40)
 
 def LunchApp():
     import sys

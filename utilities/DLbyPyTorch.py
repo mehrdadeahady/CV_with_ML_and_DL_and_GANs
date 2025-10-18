@@ -649,15 +649,16 @@ class PopupStream:
 # A utility class for early stopping during model training
 class EarlyStop:
     # Initialize with a patience value (number of epochs to wait before stopping)
-    def __init__(self, patience=10):
+    def __init__(self, patience = 10, min_delta=0.01):
         self.patience = patience      # Maximum allowed steps without improvement
+        self.min_delta = min_delta
         self.steps = 0                # Counter for consecutive non-improving steps
         self.min_loss = float('inf') # Track the minimum validation loss seen so far
 
     # Method to check whether training should stop based on validation loss
     def stop(self, val_loss):
         # If current loss is better than previous best, reset counter
-        if val_loss < self.min_loss:
+        if val_loss < self.min_loss - self.min_delta:
             self.min_loss = val_loss
             self.steps = 0
         # If not improved, increment the counter
@@ -668,3 +669,8 @@ class EarlyStop:
             return True
         else:
             return False
+    # Reset Parameters
+    def reset(self):
+        self.steps = 0
+        self.min_loss = float('inf')
+
