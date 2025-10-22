@@ -618,7 +618,14 @@ class MainWindow(QMainWindow):
             _ = self.CheckCreateDefaultFolders()
             self.DLbyPyTorchHandler.DownloadMINIST()
         else:
-            QMessageBox.information(None,"FashionMNIST Exist","Fashion-MINIST Dataset Already Downloaded.")
+            self.DLbyPyTorchHandler.DownloadMINIST(download=False)
+            # QMessageBox.information(None,"FashionMNIST Exist","Fashion-MINIST Dataset Already Downloaded.")
+
+    def PrepareDataset_GrayImages_SimpleGANs(self):
+        if len(self.DLbyPyTorchHandler.train_set) > 0:
+            self.SimpleGANsHandler.PrepareDataset_GrayImages(self.DLbyPyTorchHandler.train_set)
+        else:
+            QMessageBox.warning(None,"FashionMNIST not Ready","First, Download/Load Fashion-MINIST Dataset.")
 
     def Epochs_DLbyPyTorch_Change(self):
         total_epochs = int(self.ui.comboBox_Epochs_DLbyPyTorch.currentText().strip())
@@ -1109,6 +1116,13 @@ class MainWindow(QMainWindow):
         self.ui.dial_Z2.blockSignals(False)
 
     def ConnectActions(self):
+        self.ui.pushButton_TestModel_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_GrayImages)
+        self.ui.pushButton_SaveModel_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_GrayImages)
+        self.ui.pushButton_TrainModels_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TrainModels_GrayImages)
+        self.ui.pushButton_CreateModels_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.CreateModels_GrayImages)
+        self.ui.pushButton_PlotDataset_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.PlotMINIST)
+        self.ui.pushButton_PrepareDataset_GrayImages_SimpleGANs.clicked.connect(self.PrepareDataset_GrayImages_SimpleGANs)
+        self.ui.pushButton_DownloadDataset_GrayImages_SimpleGANs.clicked.connect(self.PrepareDownloadMINIST)
         self.ui.pushButton_TestModel_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_Shape)
         self.ui.pushButton_TestModel_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_Numbers)
         self.ui.pushButton_SaveModel_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_Numbers)
@@ -1508,7 +1522,7 @@ class MainWindow(QMainWindow):
         self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
         self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
         self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
-        self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 40)
+        self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 44)
 
 def LunchApp():
     import sys

@@ -4587,7 +4587,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>1) Download Fashion-MNIST a dataset consisting of 60,000 training set and 10,000 test set. Each example is a 28x28 grayscale image, associated with a label from 10 classes.</string>
+       <string>1) Download Fashion-MNIST a dataset consisting of 60,000 training set and 10,000 test set. Each example is a 28x28 grayscale image, associated with a label from 10 classes:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
@@ -4943,9 +4943,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>350</y>
+        <y>590</y>
         <width>981</width>
-        <height>331</height>
+        <height>91</height>
        </rect>
       </property>
      </widget>
@@ -4966,7 +4966,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>170</y>
+        <y>150</y>
         <width>981</width>
         <height>21</height>
        </rect>
@@ -4979,7 +4979,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>60</y>
+        <y>50</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -4992,7 +4992,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>60</y>
+        <y>50</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5005,7 +5005,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>60</y>
+        <y>50</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5018,7 +5018,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>760</x>
-        <y>60</y>
+        <y>50</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5044,7 +5044,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>100</y>
+        <y>90</y>
         <width>981</width>
         <height>21</height>
        </rect>
@@ -5057,7 +5057,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>130</y>
+        <y>110</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5070,7 +5070,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>130</y>
+        <y>110</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5083,7 +5083,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>130</y>
+        <y>110</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5096,7 +5096,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>760</x>
-        <y>130</y>
+        <y>110</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5109,7 +5109,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>230</y>
+        <y>200</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5122,7 +5122,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>230</y>
+        <y>200</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5135,7 +5135,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>200</y>
+        <y>180</y>
         <width>981</width>
         <height>21</height>
        </rect>
@@ -5148,7 +5148,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>300</y>
+        <y>250</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5161,7 +5161,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>300</y>
+        <y>250</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5174,7 +5174,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>270</y>
+        <y>230</y>
         <width>981</width>
         <height>21</height>
        </rect>
@@ -5187,7 +5187,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>300</y>
+        <y>250</y>
         <width>241</width>
         <height>31</height>
        </rect>
@@ -5200,13 +5200,143 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="geometry">
        <rect>
         <x>760</x>
-        <y>300</y>
+        <y>250</y>
         <width>241</width>
         <height>31</height>
        </rect>
       </property>
       <property name="text">
        <string>Test Model</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SaveModel_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>400</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Model</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_GrayImages_Step1_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>320</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1) Download Fashion-MNIST a dataset consisting of 60,000 training set and 10,000 test set. Each example is a 28x28 grayscale image, associated with a label from 10 classes:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_GrayImages_Step2_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>380</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>2) Creating Generative Adversarial Networks (GANs) a Generator Network and a Discriminator Network:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TrainModels_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>400</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Train Models</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_DownloadDataset_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>340</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Download Dataset</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>290</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Generation Gray Scale Images by GANs:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TestModel_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>760</x>
+        <y>400</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Test Model</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_PlotDataset_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>340</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Plot Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_PrepareDataset_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>340</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Prepare Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CreateModels_GrayImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>400</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Create Models</string>
       </property>
      </widget>
     </widget>

@@ -73,8 +73,12 @@ class DLbyPyTorch(QObject):
         # Show the popup window to the user
         self.DownloadLogPopup.show()
 
-        # Append an initial message to the popup log indicating the download has started
-        self.DownloadLogPopup.Append_Log("Downloading Fashion-MINIST Dataset.\nIt takes Minutes.\nWait ...\n")
+        if download:
+            # Append an initial message to the popup log indicating the download has started
+            self.DownloadLogPopup.Append_Log("Downloading Fashion-MINIST Dataset.\nIt takes Minutes.\nWait ...\n")
+        else:
+            # Append an initial message to the popup log indicating the loading has started
+            self.DownloadLogPopup.Append_Log("Loading Fashion-MINIST Dataset.\nIt takes Seconds.\nWait ...\n")
 
         # Save the original standard output stream (stdout)
         original_stdout = sys.stdout
@@ -104,9 +108,12 @@ class DLbyPyTorch(QObject):
                 download=download,        # Download if needed
                 transform=self.transform  # Apply the same transformations
             )
-
-            # Log a success message once the download is complete
-            self.DownloadLogPopup.Append_Log("Download Finished.\nClose the Log Window and Test the Dataset.")
+            if download:
+                # Log a success message once the download is complete
+                self.DownloadLogPopup.Append_Log("Download Finished.\nClose the Log Window and Test the Dataset.")
+            else:
+                # Log a success message once the download is complete
+                self.DownloadLogPopup.Append_Log("Loading Finished.\nClose the Log Window and Test the Dataset.")
 
         # Handle any exceptions that occur during download
         except Exception as e:
