@@ -4936,7 +4936,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>Generation An Exponential Growth Shape by GANs:</string>
+       <string>Generating of An Exponential Growth Shape by GANs:</string>
       </property>
      </widget>
      <widget class="QTextBrowser" name="textBrowser_SimpleGANs">
@@ -4972,7 +4972,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>Generating Numbers with Patterns by GANs:</string>
+       <string>Generating of Numbers with Patterns by GANs:</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_CreateDataset_Shape_SimpleGANs">
@@ -5019,7 +5019,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>760</x>
         <y>50</y>
-        <width>241</width>
+        <width>231</width>
         <height>31</height>
        </rect>
       </property>
@@ -5097,7 +5097,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>760</x>
         <y>110</y>
-        <width>241</width>
+        <width>231</width>
         <height>31</height>
        </rect>
       </property>
@@ -5201,7 +5201,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>760</x>
         <y>250</y>
-        <width>241</width>
+        <width>231</width>
         <height>31</height>
        </rect>
       </property>
@@ -5284,7 +5284,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>Generation Gray Scale Images by GANs:</string>
+       <string>Generation of Gray Scale Images by GANs:</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_TestModel_GrayImages_SimpleGANs">
@@ -5292,7 +5292,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>760</x>
         <y>400</y>
-        <width>241</width>
+        <width>231</width>
         <height>31</height>
        </rect>
       </property>
@@ -5337,6 +5337,136 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="text">
        <string>Create Models</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_PrepareDataset_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>490</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Prepare Dataset</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ColoredImages_Step1_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>470</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1) Download Animated Face Images from:     https://www.kaggle.com/datasets/splcher/animefacedataset          </string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SaveModel_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>550</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Model</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_DownloadDataset_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>490</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Download Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_PlotDataset_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>490</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Plot Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CreateModels_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>550</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Create Models</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>440</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Generation of Colored Images by GANs:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TestModel_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>760</x>
+        <y>550</y>
+        <width>231</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Test Model</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TrainModels_ColoredImages_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>550</y>
+        <width>241</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Train Models</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_ColoredImages_Step2_SimpleGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>530</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>2) Creating Generative Adversarial Networks (GANs) a Generator Network and a Discriminator Network:</string>
       </property>
      </widget>
     </widget>

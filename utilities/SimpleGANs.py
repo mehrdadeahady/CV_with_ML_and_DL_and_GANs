@@ -19,6 +19,7 @@ try:
     import torchvision
     import torchvision.transforms as T
     from torchvision.utils import make_grid
+    from torchvision.datasets import ImageFolder
 except:
     print("Check instalation of torch for Compatibility with OS and HardWare!")
 try:
@@ -92,7 +93,34 @@ class SimpleGANs(QObject):
         self.model_Generator_grayimages = None
         # Placeholder for Discriminator model (gray image mode)
         self.model_Discriminator_grayimages = None
+        # Set the path to the folder containing the animated face dataset
+        self.animated_faces_dataset_path = r"archive"
 
+        # Define a transformation pipeline for preprocessing colored images
+        self.transformer_colored_images = T.Compose([
+            # Resize all images to 64x64 pixels
+            T.Resize((64, 64)),
+            # Convert images to PyTorch tensors
+            T.ToTensor(),
+            # Normalize pixel values to range [-1, 1] for each RGB channel
+            T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+        ])
+
+        # Initialize an empty list to hold the loaded training images
+        self.train_data_colored_images = []
+
+        # Initialize the DataLoader as None until dataset is prepared
+        self.train_loader_colored_images = None
+
+        # Set the batch size for training colored image models
+        self.batch_size_colored_images = 128
+
+        # Initialize the Generator model for colored images as None
+        self.model_Generator_coloredimages = None
+
+        # Initialize the Discriminator model for colored images as None
+        self.model_Discriminator_coloredimages = None
+      
     # Method to create synthetic exponential dataset
     def CreateDataset_Shape(self):
         # Create a tensor of zeros with shape [observations, 2]
@@ -705,7 +733,7 @@ class SimpleGANs(QObject):
         # If data and models are ready
         else:
             # Create a window to visualize training progress
-            self.plot_window = PlotWindow(self.model_Generator_grayimages, self.device)
+            self.plot_window = PlotWindow(self.device, self.model_Generator_grayimages, None)
 
             # Display the plot window
             self.plot_window.show()
@@ -849,100 +877,560 @@ class SimpleGANs(QObject):
                 "First, Create, Train and Save the Model!"
             )
 
-# Class to display training progress using matplotlib plots inside a scrollable PyQt window
+    # Method to notify the user to manually download the colored image dataset
+    def DownloadDataset_ColoredImages(self):
+        # Show a warning message with download instructions and Kaggle link
+        QMessageBox.warning(
+            # No parent widget specified
+            None,
+            # Title of the warning dialog
+            "Must Download the Animated Face Dataset Manually",
+            # Message body with download instructions
+            "Registeration required for Download from below link:\nhttps://www.kaggle.com/datasets/splcher/animefacedataset!"
+        )
+
+    # Method to count the number of files in a given directory path
+    def CountFilesInPath(self, path):
+        # Check if the specified path exists
+        if os.path.exists(path):
+            # Initialize a counter for files
+            count = 0
+            # Traverse the directory tree
+            for root_dir, cur_dir, files in os.walk(path):
+                # Add the number of files in the current directory
+                count += len(files)
+            # Return the total count of files
+            return count
+        # If the path doesn't exist, return zero
+        else:
+            return 0
+
+    # Method to prepare the dataset for training colored image models
+    def PrepareDataset_ColoredImages(self):
+        # Check if dataset path exists and has sufficient files
+        if os.path.exists(self.animated_faces_dataset_path) and self.CountFilesInPath(self.animated_faces_dataset_path) > 63000:
+            # Load the dataset using ImageFolder
+            self.train_data_colored_images = ImageFolder(
+                # Path to the root directory containing image folders
+                root=self.animated_faces_dataset_path,
+                # Transformation to apply to each image
+                transform=self.transformer_colored_images
+            )
+
+            # Create a DataLoader for batching and shuffling the dataset
+            self.train_loader_colored_images = DataLoader(
+                # Dataset object containing transformed images
+                dataset=self.train_data_colored_images,
+                # Number of images per batch
+                batch_size=self.batch_size_colored_images,
+                # Shuffle the data at each epoch
+                shuffle=True
+            )
+
+            # Inform the user that the dataset was prepared successfully
+            QMessageBox.information(
+                # No parent widget specified
+                None,
+                # Title of the message box
+                "Success",
+                # Message body confirming preparation
+                "Data Prepared Successfully."
+            )
+        # If dataset is missing or incomplete
+        else:
+            # Show a warning message with download instructions
+            QMessageBox.warning(
+                # No parent widget specified
+                None,
+                # Title of the warning dialog
+                "Must Download the Animated Face Dataset Manually",
+                # Message body with download instructions
+                "First, Download the Dataset!\nRegisteration required for Download from below link:\nhttps://www.kaggle.com/datasets/splcher/animefacedataset!"
+            )
+
+    # Method to plot a batch of colored images in a grid layout
+    def plot_colored_images(self, images):
+        # Loop through the first 32 images
+        for i in range(32):
+            # Create a subplot in a 4x8 grid
+            ax = plt.subplot(4, 8, i + 1)
+            # Normalize pixel values and permute dimensions from (C, H, W) to (H, W, C)
+            plt.imshow(images[i].permute(1, 2, 0) / 2 + 0.5)
+            # Remove x-axis ticks for cleaner display
+            plt.xticks([])
+            # Remove y-axis ticks for cleaner display
+            plt.yticks([])
+        # Adjust vertical spacing between subplots
+        plt.subplots_adjust(hspace=-0.6)
+        # Show the plot window
+        plt.show()
+
+    # Method to visualize a batch of images from the prepared dataset
+    def PlotDataset_ColoredImages(self):
+        # Check if the dataset has been prepared
+        if self.train_loader_colored_images is None:
+            # Show a warning message if dataset is missing
+            QMessageBox.warning(
+                # No parent widget specified
+                None,
+                # Title of the warning dialog
+                "Dataset is not Ready",
+                # Message body prompting dataset preparation
+                "First, Download and Prepare the Dataset!"
+            )
+        # If dataset is available
+        else:
+            # Inform the user that plotting may take a few seconds
+            QMessageBox.information(
+                # No parent widget specified
+                None,
+                # Title of the message box
+                "Wait..",
+                # Message body indicating delay
+                "Wait...\nIt takes several seconds."
+            )
+            # Retrieve a batch of images from the DataLoader
+            images, _ = next(iter(self.train_loader_colored_images))
+            # Call the method to plot the images
+            self.plot_colored_images(images)
+
+    # Method to visualize generator output before or after training
+    def test_epoch_coloredImages(self, beforeORafter):
+        # Set the plot title based on training stage
+        if beforeORafter == "beforTraining":
+            # Title for pre-training visualization
+            title = "Generated Images before Training"
+        else:
+            # Title for post-training visualization
+            title = "Generated Images after Training"
+
+        # Generate random noise input for the generator
+        noise = torch.randn(32, 100, 1, 1).to(device=self.device)
+
+        # Generate fake samples using the generator model
+        fake_samples = self.model_Generator_coloredimages(noise).cpu().detach()
+
+        # Create a new figure with the specified title
+        plt.figure(title)
+
+        # Loop through the first 32 generated samples
+        for i in range(32):
+            # Create a subplot in a 4x8 grid
+            ax = plt.subplot(4, 8, i + 1)
+            # Normalize pixel values and permute dimensions from (C, H, W) to (H, W, C)
+            img = (fake_samples[i] / 2 + 0.5).permute(1, 2, 0)
+            # Display the image
+            plt.imshow(img)
+            # Remove x-axis ticks
+            plt.xticks([])
+            # Remove y-axis ticks
+            plt.yticks([])
+
+        # Adjust vertical spacing between subplots
+        plt.subplots_adjust(hspace=-0.6)
+        # Show the plot window
+        plt.show()
+
+    # Method to create Generator and Discriminator models for Colored Images Mode
+    def CreateModels_ColoredImages(self):
+
+        # Check if the training dataset has been prepared
+        if self.train_loader_colored_images is None:
+            # Warn the user to prepare the dataset first
+            QMessageBox.warning(None, "Dataset is not Ready", "First, Prepare the Dataset.")
+
+        # Check if the models haven't been created yet
+        elif self.model_Discriminator_coloredimages is None or self.model_Generator_coloredimages is None:
+
+            # Define the Discriminator model as a binary classifier
+            self.model_Discriminator_coloredimages = nn.Sequential(
+
+                # First convolutional layer: input RGB image → 64 feature maps
+                nn.Conv2d(3, 64, 4, 2, 1, bias=False),
+
+                # LeakyReLU activation for non-linearity with small negative slope
+                nn.LeakyReLU(0.2, inplace=True),
+
+                # Second convolutional layer: 64 → 128 feature maps
+                nn.Conv2d(64, 128, 4, 2, 1, bias=False),
+
+                # Batch normalization to stabilize learning
+                nn.BatchNorm2d(128),
+
+                # LeakyReLU activation
+                nn.LeakyReLU(0.2, inplace=True),
+
+                # Third convolutional layer: 128 → 256 feature maps
+                nn.Conv2d(128, 256, 4, 2, 1, bias=False),
+
+                # Batch normalization
+                nn.BatchNorm2d(256),
+
+                # LeakyReLU activation
+                nn.LeakyReLU(0.2, inplace=True),
+
+                # Fourth convolutional layer: 256 → 512 feature maps
+                nn.Conv2d(256, 512, 4, 2, 1, bias=False),
+
+                # Batch normalization
+                nn.BatchNorm2d(512),
+
+                # LeakyReLU activation
+                nn.LeakyReLU(0.2, inplace=True),
+
+                # Final convolutional layer: 512 → 1 output (real/fake score)
+                nn.Conv2d(512, 1, 4, 1, 0, bias=False),
+
+                # Sigmoid activation to produce probability between 0 and 1
+                nn.Sigmoid(),
+
+                # Flatten output to 1D tensor for loss computation
+                nn.Flatten()
+            ).to(self.device)
+
+            # Define the Generator model to produce fake images from noise
+            self.model_Generator_coloredimages = nn.Sequential(
+
+                # First transposed convolution: latent vector (100) → 512 feature maps
+                nn.ConvTranspose2d(100, 512, 4, 1, 0, bias=False),
+
+                # Batch normalization
+                nn.BatchNorm2d(512),
+
+                # ReLU activation for non-linearity
+                nn.ReLU(inplace=True),
+
+                # Second transposed convolution: 512 → 256 feature maps
+                nn.ConvTranspose2d(512, 256, 4, 2, 1, bias=False),
+
+                # Batch normalization
+                nn.BatchNorm2d(256),
+
+                # ReLU activation
+                nn.ReLU(inplace=True),
+
+                # Third transposed convolution: 256 → 128 feature maps
+                nn.ConvTranspose2d(256, 128, 4, 2, 1, bias=False),
+
+                # Batch normalization
+                nn.BatchNorm2d(128),
+
+                # ReLU activation
+                nn.ReLU(inplace=True),
+
+                # Fourth transposed convolution: 128 → 64 feature maps
+                nn.ConvTranspose2d(128, 64, 4, 2, 1, bias=False),
+
+                # Batch normalization
+                nn.BatchNorm2d(64),
+
+                # ReLU activation
+                nn.ReLU(inplace=True),
+
+                # Final transposed convolution: 64 → 3 channels (RGB image)
+                nn.ConvTranspose2d(64, 3, 4, 2, 1, bias=False),
+
+                # Tanh activation to scale output between -1 and 1
+                nn.Tanh()
+            ).to(self.device)
+
+            # Visualize the generator output before training begins
+            self.test_epoch_coloredImages("beforTraining")
+
+            # Notify user of successful model creation
+            QMessageBox.information(None, "Success", "Models Created Successfully.")
+
+        # If models already exist
+        else:
+            # Inform user that models are already created
+            QMessageBox.information(None, "Models Created", "Models Already are created.")
+
+    # Method to start training the models using a separate thread
+    def TrainModels_ColoredImages(self):
+
+        # Check if the training dataset has been prepared
+        if self.train_loader_colored_images is None:
+            # Warn the user to prepare the dataset first
+            QMessageBox.warning(None, "Data not Ready", "First, Prepare the Data!")
+
+        # Check if both Generator and Discriminator models are created
+        elif self.model_Generator_coloredimages is None or self.model_Discriminator_coloredimages is None:
+            # Warn the user to create the models first
+            QMessageBox.warning(None, "No Models Exist", "First, Create Models!")
+
+        # If data and models are ready
+        else:
+            # Create a window to visualize training progress
+            self.plot_window = PlotWindow(self.device, None, self.model_Generator_coloredimages)
+
+            # Display the plot window
+            self.plot_window.show()
+
+            # Create a popup window to show training logs
+            self.DownloadLogPopup = DownloadLogPopup(self.log_emitter)
+
+            # Enable the cancel button to allow stopping training
+            self.DownloadLogPopup.cancel_button.setEnabled(True)
+
+            # Display the log popup window
+            self.DownloadLogPopup.show()
+
+            # Add an initial log message to indicate training has started
+            self.DownloadLogPopup.Append_Log("Training Models!\nWait ...")
+
+            # Create a separate thread to handle training asynchronously
+            self.training_thread = TrainingColoredImagesThread(
+
+                # Reference to the plot window for visual updates
+                self.plot_window,
+
+                # Reference to the log popup for status updates
+                self.DownloadLogPopup,
+
+                # Batch size used during training
+                self.batch_size_colored_images,
+
+                # Device to run training on (CPU or GPU)
+                self.device,
+
+                # Discriminator model for training
+                self.model_Discriminator_coloredimages,
+
+                # Generator model for training
+                self.model_Generator_coloredimages,
+
+                # Learning rate for the optimizer
+                self.lr,
+
+                # DataLoader containing the training data
+                self.train_loader_colored_images,
+
+                # Loss function used during training
+                self.loss_fn,
+
+                # Mean squared error metric for evaluation
+                self.mse
+            )
+
+            # Connect the thread's log signal to the log popup's append method
+            self.training_thread.log_signal.connect(self.DownloadLogPopup.Append_Log)
+
+            # Connect the thread's display signal to the plot window's display method
+            self.training_thread.display_signal.connect(self.plot_window.display_signal_colored)
+
+            # Connect the cancel button to the thread's stop method to allow interruption
+            self.DownloadLogPopup.cancel_button.clicked.connect(self.training_thread.stop)
+
+            # Start the training thread
+            self.training_thread.start()
+
+    # Method to save the trained Generator model for Colored Images
+    def SaveModel_ColoredImages(self):
+
+        # Check if either the Generator or Discriminator model is missing
+        if self.model_Generator_coloredimages is None or self.model_Discriminator_coloredimages is None:
+            # Show a warning dialog prompting the user to create and train the models first
+            QMessageBox.warning(None, "No Model", "First, Create and Train the Model!")
+
+        # If both models are available
+        else:
+            # Check if the directory for saving models exists
+            if not os.path.exists("resources/models"):
+                # Create the directory if it doesn't already exist
+                os.makedirs("resources/models", exist_ok=True)
+
+            # Check if the Generator model file hasn't already been saved
+            if not os.path.exists("resources/models/ColoredImagesGenerator.pt"):
+                # Convert the Generator model to TorchScript format for efficient saving and loading
+                scripted = torch.jit.script(self.model_Generator_coloredimages).to(self.device)
+
+                # Save the scripted model to the specified file path
+                scripted.save('resources/models/ColoredImagesGenerator.pt')
+
+            # Load the saved Generator model from disk to verify successful saving
+            Loaded_Generator_Model = torch.jit.load(
+                'resources/models/ColoredImagesGenerator.pt',  # Path to the saved model
+                map_location=self.device                       # Load it on the same device (CPU or GPU)
+            )
+
+            # Show a confirmation dialog with the loaded model's structure in evaluation mode
+            QMessageBox.information(
+                None,  # No parent widget
+                "Generator Model Saved/Loaded",  # Title of the message box
+                "Model Saved/Loaded Successfully:\n" + str(Loaded_Generator_Model.eval())  # Message body
+            )
+
+    # Method to test the saved Generator model by generating new samples
+    def TestModel_ColoredImages(self):
+
+        # Check if the saved Generator model file exists on disk
+        if os.path.exists("resources/models/ColoredImagesGenerator.pt"):
+
+            # Load the Generator model using TorchScript for inference
+            Loaded_Generator_Model = torch.jit.load(
+                'resources/models/ColoredImagesGenerator.pt',  # Path to saved model
+                map_location=self.device                       # Load model on the correct device (CPU/GPU)
+            )
+
+            # Generate a batch of random noise vectors as input to the Generator
+            noise = torch.randn(32, 100, 1, 1).to(self.device)  # Shape matches expected input for ConvTranspose2d
+
+            # Use the loaded Generator model to produce synthetic images
+            fake_samples = Loaded_Generator_Model(noise).cpu().detach()  # Move to CPU and detach from computation graph
+
+            # Loop through each of the 32 generated samples
+            for i in range(32):
+
+                # Create a subplot in a 4-row × 8-column grid for each image
+                ax = plt.subplot(4, 8, i + 1)
+
+                # Normalize pixel values from [-1, 1] to [0, 1] and rearrange dimensions to (H, W, C)
+                img = (fake_samples[i] / 2 + 0.5).permute(1, 2, 0)  # permute changes from (C, H, W) to (H, W, C)
+
+                # Display the image using matplotlib
+                plt.imshow(img)
+
+                # Remove x-axis ticks for a cleaner look
+                plt.xticks([])
+
+                # Remove y-axis ticks for a cleaner look
+                plt.yticks([])
+
+            # Adjust vertical spacing between subplots to reduce gaps
+            plt.subplots_adjust(hspace=-0.6)
+
+            # Render the plot window with all generated images
+            plt.show()
+
+        # If the model file does not exist
+        else:
+            # Show a warning message prompting the user to create and save the model first
+            QMessageBox.warning(
+                None,                          # No parent widget
+                "Model not Saved",             # Title of the warning dialog
+                "First, Create, Train and Save the Model!"  # Message body
+            )
+
+# Class to visualize GAN training progress using matplotlib plots inside a PyQt scrollable window
 class PlotWindow(QMainWindow):
-    # Constructor to initialize the plot window
-    def __init__(self, model_Generator_grayimages = None, device = None):
-        # Call the parent class constructor
+
+    # Constructor to initialize the plot window and its components
+    def __init__(self, device=None, model_Generator_grayimages=None, model_Generator_coloredimages=None):
+        # Call the base QMainWindow constructor
         super().__init__()
 
-        # Set the window title
+        # Set the title of the main window
         self.setWindowTitle("Training Progress")
 
-        # Set the initial window size
+        # Set the initial size of the window
         self.resize(800, 700)
 
-        # Create a scrollable area to hold plots
+        # Create a scrollable area to hold multiple plot canvases
         self.scroll = QScrollArea()
 
-        # Create a container widget to hold the layout and plot canvases
+        # Create a container widget to hold the layout and plots
         self.container = QWidget()
 
-        # Create a vertical layout for stacking multiple plots
+        # Create a vertical layout to stack plots vertically inside the container
         self.layout = QVBoxLayout(self.container)
 
-        # Set the container widget inside the scroll area
+        # Set the container widget as the content of the scroll area
         self.scroll.setWidget(self.container)
 
-        # Allow the scroll area to resize its contents dynamically
+        # Enable dynamic resizing of the scroll area’s contents
         self.scroll.setWidgetResizable(True)
 
-        # Set the scroll area as the central widget of the window
+        # Set the scroll area as the central widget of the main window
         self.setCentralWidget(self.scroll)
 
+        # Store reference to the generator model for grayscale images
         self.model_Generator_grayimages = model_Generator_grayimages
 
+        # Store the device (CPU or GPU) used for computation
         self.device = device
 
-    # Method to add a new plot showing generated vs real samples
+        # Store reference to the generator model for colored images
+        self.model_Generator_coloredimages = model_Generator_coloredimages
+
+    # Method to add a scatter plot comparing generated and real samples
     def add_plot(self, fake_samples, train_data, epoch):
-        # Create a new matplotlib figure with specified size
+        # Create a new matplotlib figure with specified dimensions
         fig = Figure(figsize=(6, 4))
 
-        # Create a canvas to render the figure inside the PyQt window
+        # Create a canvas to render the figure inside the PyQt interface
         canvas = FigureCanvas(fig)
 
         # Set a minimum height for the canvas to ensure visibility
         canvas.setMinimumHeight(400)
 
-        # Add a subplot to the figure for plotting data
+        # Add a single subplot to the figure
         ax = fig.add_subplot(111)
 
-        # Plot generated samples (fake data) in green with star markers
+        # Plot generated samples in green using star markers
         ax.plot(fake_samples[:, 0], fake_samples[:, 1], "*", c="g", label="generated samples")
 
-        # Plot real samples (training data) in red with dot markers and reduced opacity
+        # Plot real training samples in red using dot markers with low opacity
         ax.plot(train_data[:, 0], train_data[:, 1], ".", c="r", alpha=0.1, label="real samples")
 
         # Set the title of the plot to indicate the current epoch
         ax.set_title(f"Epoch {epoch}")
 
-        # Set the x-axis limits to focus on the relevant range
+        # Set x-axis limits to focus on the relevant data range
         ax.set_xlim(0, 50)
 
-        # Set the y-axis limits to match the expected output range
+        # Set y-axis limits to match the expected output range
         ax.set_ylim(0, 50)
 
-        # Display the legend to differentiate between real and generated samples
+        # Add a legend to distinguish between real and generated samples
         ax.legend()
 
-        # Adjust the subplot margins for better spacing
+        # Adjust subplot margins for better layout
         fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
 
-        # Add the canvas to the vertical layout so it appears in the scrollable view
+        # Add the canvas to the layout so it appears in the scrollable view
         self.layout.addWidget(canvas)
 
-        # Automatically scroll to the bottom to show the latest plot
+        # Scroll to the bottom to show the most recent plot
         self.scroll.verticalScrollBar().setValue(self.scroll.verticalScrollBar().maximum())
-    
+
+    # Method to display grayscale images generated by the model
     def display_signal(self, epoch):
-        # Generate noise and produce fake samples
+        # Generate random noise input for the generator
         noise = torch.randn(32, 100).to(self.device)
+
+        # Generate fake grayscale samples from the noise
         fake_samples = self.model_Generator_grayimages(noise).cpu().detach()
 
-        # Create a new matplotlib figure
+        # Create a new matplotlib figure with large dimensions
         fig = Figure(figsize=(20, 10), dpi=72)
+
+        # Create a canvas to render the figure
         canvas = FigureCanvas(fig)
+
+        # Set a minimum height for the canvas to ensure visibility
         canvas.setMinimumHeight(600)
 
-        # Create a grid of subplots
+        # Create a grid of 4x8 subplots to display 32 images
         for i in range(32):
+            # Add subplot at position i+1
             ax = fig.add_subplot(4, 8, i + 1)
+
+            # Normalize and reshape the image to 28x28 pixels
             image = (fake_samples[i] / 2 + 0.5).reshape(28, 28)
+
+            # Display the image in grayscale
             ax.imshow(image, cmap='gray')
+
+            # Remove x-axis ticks for cleaner display
             ax.set_xticks([])
+
+            # Remove y-axis ticks for cleaner display
             ax.set_yticks([])
+
+        # Set the figure title to indicate the current epoch
         fig.suptitle(f"Generated Images after Epoch {epoch}", fontsize=16)
+
+        # Adjust subplot layout for spacing
         fig.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.05, wspace=0.2, hspace=0.3)
 
         # Add the canvas to the layout
@@ -950,7 +1438,53 @@ class PlotWindow(QMainWindow):
 
         # Scroll to the bottom to show the latest plot
         self.scroll.verticalScrollBar().setValue(self.scroll.verticalScrollBar().maximum())
-        
+
+    # Method to display colored images generated by the model
+    def display_signal_colored(self, epoch):
+        # Generate random noise input for the generator (4D tensor for convolutional input)
+        noise = torch.randn(32, 100, 1, 1).to(device=self.device)
+
+        # Generate fake colored samples from the noise
+        fake_samples = self.model_Generator_coloredimages(noise).cpu().detach()
+
+        # Create a new matplotlib figure with large dimensions
+        fig = Figure(figsize=(20, 10), dpi=72)
+
+        # Create a canvas to render the figure
+        canvas = FigureCanvas(fig)
+
+        # Set a minimum height for the canvas to ensure visibility
+        canvas.setMinimumHeight(600)
+
+        # Create a grid of 4x8 subplots to display 32 images
+        for i in range(32):
+            # Add subplot at position i+1
+            ax = fig.add_subplot(4, 8, i + 1)
+
+            # Normalize and permute image dimensions to (H, W, C) for display
+            image = (fake_samples[i] / 2 + 0.5).permute(1, 2, 0)
+
+            # Display the image using default color mapping
+            ax.imshow(image)
+
+            # Remove x-axis ticks for cleaner display
+            ax.set_xticks([])
+
+            # Remove y-axis ticks for cleaner display
+            ax.set_yticks([])
+
+        # Set the figure title to indicate the current epoch
+        fig.suptitle(f"Generated Images after Epoch {epoch}", fontsize=16)
+
+        # Adjust subplot layout for spacing
+        fig.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.05, wspace=0.2, hspace=0.3)
+
+        # Add the canvas to the layout
+        self.layout.addWidget(canvas)
+
+        # Scroll to the bottom to show the latest plot
+        self.scroll.verticalScrollBar().setValue(self.scroll.verticalScrollBar().maximum())
+
 # Thread class to train GAN models on exponential shape data
 class TrainingShapeThread(QThread):
     # Signal to emit log messages to the UI
@@ -1594,6 +2128,233 @@ class TrainingGrayImagesThread(QThread):
                 QApplication.processEvents()
 
             # Emit message indicating training has finished
+            self.log_signal.emit("Training Finished.")
+
+        # Catch and log any exceptions that occur during training
+        except Exception as e:
+            self.log_signal.emit(f"Error during training: {str(e)}")
+
+# Define a thread class to handle GAN training for colored image data
+class TrainingColoredImagesThread(QThread):
+
+    # Define a PyQt signal to send log messages to the UI
+    log_signal = pyqtSignal(str)
+
+    # Define a PyQt signal to trigger image display updates in the UI
+    display_signal = pyqtSignal(int)
+
+    # Constructor method to initialize training configuration and models
+    def __init__(self, plot_window, DownloadLogPopup, batch_size_coloredImage , device, model_Discriminator_coloredimages, model_Generator_coloredimages, lr, train_loader_coloredimages, loss_fn, mse):
+        # Call the base class constructor to initialize QThread
+        super().__init__()
+
+        # Reference to the plotting window for visualizing generated images
+        self.plot_window = plot_window
+
+        # Reference to the log popup window for displaying training logs
+        self.DownloadLogPopup = DownloadLogPopup
+
+        # Set the batch size used during training iterations
+        self.batch_size = batch_size_coloredImage
+
+        # Set the device (CPU or GPU) for model computation
+        self.device = device
+
+        # Override the learning rate with a fixed value (ignores passed-in lr)
+        self.lr = 0.0001
+
+        # Store the discriminator model used to classify real vs fake images
+        self.model_Discriminator_coloredimages = model_Discriminator_coloredimages
+
+        # Store the generator model used to synthesize fake images
+        self.model_Generator_coloredimages = model_Generator_coloredimages
+
+        # Initialize the optimizer for the discriminator using Adam algorithm
+        self.optimD = torch.optim.Adam(self.model_Discriminator_coloredimages.parameters(), lr=self.lr)
+
+        # Initialize the optimizer for the generator using Adam algorithm
+        self.optimG = torch.optim.Adam(self.model_Generator_coloredimages.parameters(), lr=self.lr)
+
+        # Create a tensor of real labels (value 1) for training discriminator
+        self.real_labels = torch.ones((batch_size_coloredImage, 1)).to(device)
+
+        # Create a tensor of fake labels (value 0) for training discriminator
+        self.fake_labels = torch.zeros((batch_size_coloredImage, 1)).to(device)
+
+        # Initialize early stopping mechanism to halt training if no improvement
+        self.stopper = EarlyStop(patience=1000, min_delta=0.01)
+
+        # Store the data loader that provides batches of training images
+        self.train_loader_coloredimages = train_loader_coloredimages
+
+        # Set the loss function to Binary Cross Entropy for classification tasks
+        self.loss_fn = nn.BCELoss()
+
+        # Generate fixed noise input for generator evaluation and move to device
+        self.noise = torch.randn((self.batch_size, 2)).to(device)
+
+        # Store Mean Squared Error loss function for evaluation (if needed)
+        self.mse = mse
+
+        # Flag to indicate whether a manual stop has been requested
+        self._stop_requested = False
+
+    # Method to train the discriminator using real image samples
+    def train_D_on_real(self, real_samples):
+        # Move real samples to the computation device
+        real_samples = real_samples.to(self.device)
+
+        # Get discriminator predictions for real samples
+        preds = self.model_Discriminator_coloredimages(real_samples)
+
+        # Create label tensor of ones (real)
+        labels = torch.ones((real_samples.shape[0], 1)).to(self.device)
+
+        # Compute loss between predictions and real labels
+        loss_D = self.loss_fn(preds, labels)
+
+        # Zero out previous gradients
+        self.optimD.zero_grad()
+
+        # Backpropagate the loss
+        loss_D.backward()
+
+        # Update discriminator weights
+        self.optimD.step()
+
+        # Return the computed loss
+        return loss_D
+
+    # Method to train the discriminator using fake image samples
+    def train_D_on_fake(self):
+        # Generate random noise input for generator
+        noise = torch.randn(self.batch_size, 100, 1, 1).to(self.device)
+
+        # Generate fake images from noise
+        generated_data = self.model_Generator_coloredimages(noise)
+
+        # Get discriminator predictions for fake images
+        preds = self.model_Discriminator_coloredimages(generated_data)
+
+        # Compute loss between predictions and fake labels (zeros)
+        loss_D = self.loss_fn(preds, self.fake_labels)
+
+        # Zero out previous gradients
+        self.optimD.zero_grad()
+
+        # Backpropagate the loss
+        loss_D.backward()
+
+        # Update discriminator weights
+        self.optimD.step()
+
+        # Return the computed loss
+        return loss_D
+
+    # Method to train the generator to fool the discriminator
+    def train_G(self):
+        # Generate random noise input for generator
+        noise = torch.randn(self.batch_size, 100, 1, 1).to(self.device)
+
+        # Generate fake images from noise
+        generated_data = self.model_Generator_coloredimages(noise)
+
+        # Get discriminator predictions for fake images
+        preds = self.model_Discriminator_coloredimages(generated_data)
+
+        # Compute loss between predictions and real labels (goal: fool discriminator)
+        loss_G = self.loss_fn(preds, self.real_labels)
+
+        # Zero out previous gradients
+        self.optimG.zero_grad()
+
+        # Backpropagate the loss
+        loss_G.backward()
+
+        # Update generator weights
+        self.optimG.step()
+
+        # Return the computed loss
+        return loss_G
+
+    # Method to manually stop the training process
+    def stop(self):
+        # Set the stop flag to True
+        self._stop_requested = True
+
+        # Disable the cancel button in the UI to prevent further interaction
+        self.DownloadLogPopup.cancel_button.setEnabled(False)
+
+    # Main method that runs the training loop in a separate thread
+    def run(self):
+        try:
+            # Emit signal to indicate training has started
+            self.log_signal.emit("Training thread started.")
+
+            # Emit signal with number of batches in the training loader
+            self.log_signal.emit(f"Train loader has {len(self.train_loader_coloredimages)} batches.")
+
+            # Loop through training epochs
+            for i in range(20):
+                # Check if stop was requested
+                if self._stop_requested:
+                    # Exit the epoch loop
+                    break
+
+                # Emit signal indicating current epoch
+                self.log_signal.emit(f"Epoch {i+1} started.")
+
+                # Initialize accumulators for generator and discriminator loss
+                gloss = 0
+                dloss = 0
+
+                # Loop through each batch in the training data
+                for n, (real_samples, _) in enumerate(self.train_loader_coloredimages):
+                    # Check if stop was requested
+                    if self._stop_requested:
+                        # Emit stop message and exit batch loop
+                        self.log_signal.emit("Training stopped by user.")
+                        break
+
+                    # Emit progress message every 10 batches
+                    if n % 10 == 0:
+                        self.log_signal.emit(f"Processing batch {n+1}/{len(self.train_loader_coloredimages)}")
+
+                    # Train discriminator on real samples and accumulate loss
+                    loss_D = self.train_D_on_real(real_samples)
+                    dloss += loss_D.item()
+
+                    # Train discriminator on fake samples and accumulate loss
+                    loss_D = self.train_D_on_fake()
+                    dloss += loss_D.item()
+
+                    # Train generator and accumulate loss
+                    loss_G = self.train_G()
+                    gloss += loss_G.item()
+
+                # Compute average generator loss for the epoch
+                gloss = gloss / n
+
+                # Compute average discriminator loss for the epoch
+                dloss = dloss / n
+
+                # Emit display signal every 2 epochs to update visuals
+                if i % 2 == 0:
+                    self.display_signal.emit(i + 1)
+
+                # Emit loss summary for the current epoch
+                self.log_signal.emit(f"At epoch {i+1}, Discriminator Model loss: {dloss}, Generator Model loss: {gloss}")
+
+                # Scroll log output to the bottom in the UI
+                self.DownloadLogPopup.log_output.moveCursor(QTextCursor.MoveOperation.End)
+
+                # Ensure the cursor is visible in the log output
+                self.DownloadLogPopup.log_output.ensureCursorVisible()
+
+                # Process UI events to keep the interface responsive
+                QApplication.processEvents()
+
+            # Emit signal indicating training has completed
             self.log_signal.emit("Training Finished.")
 
         # Catch and log any exceptions that occur during training

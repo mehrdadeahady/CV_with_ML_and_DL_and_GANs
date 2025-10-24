@@ -1116,6 +1116,13 @@ class MainWindow(QMainWindow):
         self.ui.dial_Z2.blockSignals(False)
 
     def ConnectActions(self):
+        self.ui.pushButton_TestModel_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_ColoredImages)
+        self.ui.pushButton_SaveModel_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_ColoredImages)
+        self.ui.pushButton_TrainModels_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TrainModels_ColoredImages)
+        self.ui.pushButton_CreateModels_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.CreateModels_ColoredImages)
+        self.ui.pushButton_PlotDataset_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.PlotDataset_ColoredImages)
+        self.ui.pushButton_PrepareDataset_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.PrepareDataset_ColoredImages)
+        self.ui.pushButton_DownloadDataset_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.DownloadDataset_ColoredImages)
         self.ui.pushButton_TestModel_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_GrayImages)
         self.ui.pushButton_SaveModel_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_GrayImages)
         self.ui.pushButton_TrainModels_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TrainModels_GrayImages)
@@ -1522,7 +1529,7 @@ class MainWindow(QMainWindow):
         self.FillCode(TransferLearning,self.ui.textBrowser_TransferLearning, 46)
         self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
         self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
-        self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 44)
+        self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 77)
 
 def LunchApp():
     import sys
