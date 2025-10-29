@@ -12,6 +12,7 @@ from utilities.TransferLearning import TransferLearning
 from utilities.NeuralStyleTransfer import NeuralStyleTransfer
 from utilities.DLbyPyTorch import DLbyPyTorch
 from utilities.SimpleGANs import SimpleGANs
+from utilities.ConditionalGANs import ConditionalGANs
 import os
 from os import path, listdir
 from os.path import isfile, join
@@ -99,7 +100,8 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource3.setText(_translate("MainWindow","🧱 GANs Architecture Source3"))
         self.action_TheoreticalGANsSource4.setText(_translate("MainWindow","🧱 GANs Architecture Source4"))
         self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setText(_translate("MainWindow","☯ DL by PyTorch - Binary and Multi Category Classifications"))
-        self.action_SimpleGANs.setText(_translate("MainWindow","🔰 Creating 2 Simple GANs"))
+        self.action_SimpleGANs.setText(_translate("MainWindow","🔰 Creating 3 Simple GANs"))
+        self.action_ConditionalGANs.setText(_translate("MainWindow","🎭 Creating Conditional GANs"))
 
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -1203,6 +1205,7 @@ class MainWindow(QMainWindow):
         self.action_NeuralStyleTransfer.triggered.connect(self.changePage)
         self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.triggered.connect(self.changePage)
         self.action_SimpleGANs.triggered.connect(self.changePage)
+        self.action_ConditionalGANs.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1230,6 +1233,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode_NeuralStyleTransfer.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_NeuralStyleTransfer))
         self.ui.pushButton_SaveCode_DLbyPyTorch.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DLbyPyTorch))
         self.ui.pushButton_SaveCode_SimpleGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_SimpleGANs))
+        self.ui.pushButton_SaveCode_ConditionalGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_ConditionalGANs))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1331,6 +1335,7 @@ class MainWindow(QMainWindow):
         self.NeuralStyleTransferHandler = NeuralStyleTransfer()
         self.DLbyPyTorchHandler = DLbyPyTorch()
         self.SimpleGANsHandler = SimpleGANs()
+        self.ConditionalGANsHandler = ConditionalGANs()
         
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
@@ -1488,6 +1493,9 @@ class MainWindow(QMainWindow):
         self.action_SimpleGANs = QtGui.QAction(parent=self)
         self.action_SimpleGANs.setObjectName("action_SimpleGANs")
         self.menu_PracticalGANs.addAction(self.action_SimpleGANs)
+        self.action_ConditionalGANs = QtGui.QAction(parent=self)
+        self.action_ConditionalGANs.setObjectName("action_ConditionalGANs")
+        self.menu_PracticalGANs.addAction(self.action_ConditionalGANs)
 
         self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
         self.menu_TheoreticalGANsDeploymentOptimization.setObjectName("menu_TheoreticalGANsDeploymentOptimization")
@@ -1530,6 +1538,7 @@ class MainWindow(QMainWindow):
         self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
         self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
         self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 77)
+        self.FillCode(ConditionalGANs,self.ui.textBrowser_ConditionalGANs, 27)
 
 def LunchApp():
     import sys

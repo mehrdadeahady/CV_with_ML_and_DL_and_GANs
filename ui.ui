@@ -100,7 +100,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>8</number>
+     <number>9</number>
     </property>
     <widget class="QWidget" name="page_ImagesAndColorsManipulationsAndOprations">
      <property name="sizePolicy">
@@ -5470,13 +5470,246 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="page_ConditionalGANs">
+     <widget class="QPushButton" name="pushButton_SaveCode_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>680</y>
+        <width>100</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Code</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Shape_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Selecting Characteristics in Generated Images by Conditional GANs:</string>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="textBrowser_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>390</y>
+        <width>981</width>
+        <height>291</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_DownloadDataset_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Download Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_ArrangeDataset_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>30</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Arrange Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_DisplayImagesWithGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Display Images with Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_DisplayImagesWithoutGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>70</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Display Images without Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CreateModels_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>170</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Create Models - Initialize Weights</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_PrepareDataset_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>130</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Prepare Dataset</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_AddLabels_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>130</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add Labels</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TrainModels_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>170</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Train Models</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SelectImagesWithEyeGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>230</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select Images with Eye-Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SelectImagesWithoutEyeGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>230</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select Images without Eye-Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TransitionFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>270</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Transition Females with Eye-Glasses to without Eye-Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TransitionMalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>270</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Transition Males with Eye-Glasses to without Eye-Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TransitionMaleToFemalesWithoutEyeGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>310</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Transition Male to Females without Eye-Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>310</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Transition Male to Females with Eye-Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>350</y>
+        <width>981</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Transition Male to Females with Eye-Glasses to without Eye-Glasses</string>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="page_AboutAuthorDeveloper">
      <widget class="QTextBrowser" name="textBrowser_AboutAuthorDeveloper">
       <property name="geometry">
        <rect>
-        <x>5</x>
+        <x>15</x>
         <y>0</y>
-        <width>991</width>
+        <width>971</width>
         <height>711</height>
        </rect>
       </property>
@@ -5486,9 +5719,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextBrowser" name="textBrowser_AboutTool">
       <property name="geometry">
        <rect>
-        <x>5</x>
+        <x>15</x>
         <y>0</y>
-        <width>991</width>
+        <width>971</width>
         <height>711</height>
        </rect>
       </property>
