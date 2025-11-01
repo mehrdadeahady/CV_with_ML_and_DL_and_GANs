@@ -5694,7 +5694,20 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>10</x>
         <y>350</y>
-        <width>981</width>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Transition Male to Females with Eye-Glasses to without Eye-Glasses</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>350</y>
+        <width>481</width>
         <height>31</height>
        </rect>
       </property>

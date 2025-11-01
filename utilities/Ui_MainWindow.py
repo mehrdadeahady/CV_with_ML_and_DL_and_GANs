@@ -6,8 +6,8 @@ except:
     print("You Should Install PyQt6 Library!")
 
 class UI_MainWindow(object):
- 
-  def setupUi(self, MainWindow):
+   
+    def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1024, 768)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
@@ -1708,8 +1708,11 @@ class UI_MainWindow(object):
         self.pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs.setGeometry(QtCore.QRect(510, 310, 481, 31))
         self.pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs.setObjectName("pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs")
         self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs = QtWidgets.QPushButton(parent=self.page_ConditionalGANs)
-        self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.setGeometry(QtCore.QRect(10, 350, 981, 31))
+        self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.setGeometry(QtCore.QRect(10, 350, 491, 31))
         self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.setObjectName("pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs")
+        self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs = QtWidgets.QPushButton(parent=self.page_ConditionalGANs)
+        self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs.setGeometry(QtCore.QRect(510, 350, 481, 31))
+        self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs.setObjectName("pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs")
         self.pages.addWidget(self.page_ConditionalGANs)
         self.page_AboutAuthorDeveloper = QtWidgets.QWidget()
         self.page_AboutAuthorDeveloper.setObjectName("page_AboutAuthorDeveloper")
@@ -1916,7 +1919,7 @@ class UI_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-  def retranslateUi(self, MainWindow):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Computer Vision with Machine Learning and Deep Learning"))
         self.groupBox_FlipImage.setTitle(_translate("MainWindow", "Flip"))
@@ -2349,6 +2352,7 @@ class UI_MainWindow(object):
         self.pushButton_TransitionMaleToFemalesWithoutEyeGlasses_ConditionalGANs.setText(_translate("MainWindow", "Transition Male to Females without Eye-Glasses"))
         self.pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs.setText(_translate("MainWindow", "Transition Male to Females with Eye-Glasses"))
         self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.setText(_translate("MainWindow", "Transition Male to Females with Eye-Glasses to without Eye-Glasses"))
+        self.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs.setText(_translate("MainWindow", "Transition Male to Females with Eye-Glasses to without Eye-Glasses"))
         self.menuTopics.setTitle(_translate("MainWindow", "Topics"))
         self.menuSettings.setTitle(_translate("MainWindow", "Settings"))
         self.menuControls.setTitle(_translate("MainWindow", "Controls"))

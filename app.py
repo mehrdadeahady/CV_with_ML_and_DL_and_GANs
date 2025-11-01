@@ -13,6 +13,7 @@ from utilities.NeuralStyleTransfer import NeuralStyleTransfer
 from utilities.DLbyPyTorch import DLbyPyTorch
 from utilities.SimpleGANs import SimpleGANs
 from utilities.ConditionalGANs import ConditionalGANs
+from utilities.ScrollableMessageBox import show_scrollable_message
 import os
 from os import path, listdir
 from os.path import isfile, join
@@ -100,7 +101,7 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource3.setText(_translate("MainWindow","🧱 GANs Architecture Source3"))
         self.action_TheoreticalGANsSource4.setText(_translate("MainWindow","🧱 GANs Architecture Source4"))
         self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setText(_translate("MainWindow","☯ DL by PyTorch - Binary and Multi Category Classifications"))
-        self.action_SimpleGANs.setText(_translate("MainWindow","🔰 Creating 3 Simple GANs"))
+        self.action_SimpleGANs.setText(_translate("MainWindow","🔰 Creating 4 Simple GANs"))
         self.action_ConditionalGANs.setText(_translate("MainWindow","🎭 Creating Conditional GANs"))
 
     def PrepareCancelTraining(self):
@@ -623,11 +624,34 @@ class MainWindow(QMainWindow):
             self.DLbyPyTorchHandler.DownloadMINIST(download=False)
             # QMessageBox.information(None,"FashionMNIST Exist","Fashion-MINIST Dataset Already Downloaded.")
 
+    def DownloadEyeGlassesDataset(self):
+        if  self.CountFilesInPath("kagglehub") < 5002:
+            show_scrollable_message("Download Information:","Manually Download eyeglasses Dataset from Kaggle, Below Link:" +
+                                    "\nhttps://www.kaggle.com/datasets/jeffheaton/glasses-or-no-glasses/data" +
+                                    "\nIt contains: 1) Image folder (faces-spring-2020) 2) train.csv 3) test.csv." +
+                                    "\nThere are 5000 images in the folder /faces-spring-2020/" +
+                                    "\nAlso you adjust the Download in the Code same as Below:" +
+                                    "\nimport kagglehub" +
+                                    "\n# Download latest version" +
+                                    "\npath = kagglehub.dataset_download('jeffheaton/glasses-or-no-glasses')" +
+                                    "\nprint('Path to dataset files:', path)" +
+                                    "\nAfter Download:" +
+                                    "\nUN-Zip the File" +
+                                    "\nRename folder files to kagglehub" +
+                                    "\nRename folder faces-spring-2020 to faces" +
+                                    "\nCopy it into Root of your Project.")
+        else:
+            QMessageBox.information(None,"Dataset exist","Dataset Already Downloaded.")
+
     def PrepareDataset_GrayImages_SimpleGANs(self):
         if len(self.DLbyPyTorchHandler.train_set) > 0:
             self.SimpleGANsHandler.PrepareDataset_GrayImages(self.DLbyPyTorchHandler.train_set)
         else:
             QMessageBox.warning(None,"FashionMNIST not Ready","First, Download/Load Fashion-MINIST Dataset.")
+
+    def PrepareShowEyeGlassesImages(self):
+        sender = self.sender().objectName()
+        self.ConditionalGANsHandler.ShowEyeGlassesImages(sender)
 
     def Epochs_DLbyPyTorch_Change(self):
         total_epochs = int(self.ui.comboBox_Epochs_DLbyPyTorch.currentText().strip())
@@ -642,6 +666,21 @@ class MainWindow(QMainWindow):
         self.frame_pdf_view.pdf_document = self.frame_pdf_document
         self.frame_pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
         self.frame_pdf_view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+
+    def CountFilesInPath(self, path):
+        # Check if the specified path exists
+        if os.path.exists(path):
+            # Initialize a counter for files
+            count = 0
+            # Traverse the directory tree
+            for root_dir, cur_dir, files in os.walk(path):
+                # Add the number of files in the current directory
+                count += len(files)
+            # Return the total count of files
+            return count
+        # If the path doesn't exist, return zero
+        else:
+            return 0
 
     def get_dir_size(self,path):
         total = 0
@@ -1117,7 +1156,28 @@ class MainWindow(QMainWindow):
         self.ui.dial_Z1.blockSignals(False)
         self.ui.dial_Z2.blockSignals(False)
 
+    def PrepareSelectImagesCGANs(self):
+        sender = self.sender().objectName()
+        self.ConditionalGANsHandler.GenerateAndDisplayImages(sender)
+
     def ConnectActions(self):
+        self.ui.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+        self.ui.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+        self.ui.pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+        self.ui.pushButton_TransitionMaleToFemalesWithoutEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+        self.ui.pushButton_TransitionMalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+        self.ui.pushButton_TransitionFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+
+        self.ui.pushButton_SelectImagesWithoutEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+        self.ui.pushButton_SelectImagesWithEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
+        self.ui.pushButton_TrainModels_ConditionalGANs.clicked.connect(self.ConditionalGANsHandler.TrainModel)
+        self.ui.pushButton_CreateModels_ConditionalGANs.clicked.connect(self.ConditionalGANsHandler.CreateModels_InitializeWeights)
+        self.ui.pushButton_PrepareDataset_ConditionalGANs.clicked.connect(self.ConditionalGANsHandler.PrepareDataset)
+        self.ui.pushButton_AddLabels_ConditionalGANs.clicked.connect(self.ConditionalGANsHandler.AddLabels)
+        self.ui.pushButton_DisplayImagesWithoutGlasses_ConditionalGANs.clicked.connect(self.PrepareShowEyeGlassesImages)
+        self.ui.pushButton_DisplayImagesWithGlasses_ConditionalGANs.clicked.connect(self.PrepareShowEyeGlassesImages)
+        self.ui.pushButton_ArrangeDataset_ConditionalGANs.clicked.connect(self.ConditionalGANsHandler.ArrangeEyeGlassesDataset)
+        self.ui.pushButton_DownloadDataset_ConditionalGANs.clicked.connect(self.DownloadEyeGlassesDataset)
         self.ui.pushButton_TestModel_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_ColoredImages)
         self.ui.pushButton_SaveModel_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_ColoredImages)
         self.ui.pushButton_TrainModels_ColoredImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TrainModels_ColoredImages)
@@ -1538,7 +1598,7 @@ class MainWindow(QMainWindow):
         self.FillCode(NeuralStyleTransfer,self.ui.textBrowser_NeuralStyleTransfer, 10)
         self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
         self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 77)
-        self.FillCode(ConditionalGANs,self.ui.textBrowser_ConditionalGANs, 27)
+        self.FillCode(ConditionalGANs,self.ui.textBrowser_ConditionalGANs, 73)
 
 def LunchApp():
     import sys
