@@ -13,6 +13,7 @@ from utilities.NeuralStyleTransfer import NeuralStyleTransfer
 from utilities.DLbyPyTorch import DLbyPyTorch
 from utilities.SimpleGANs import SimpleGANs
 from utilities.ConditionalGANs import ConditionalGANs
+from utilities.CycleGANs import CycleGANs
 from utilities.ScrollableMessageBox import show_scrollable_message
 import os
 from os import path, listdir
@@ -29,7 +30,7 @@ try:
     import cv2
     from cv2_enumerate_cameras import enumerate_cameras
 except:
-    print("You Should Install OpenCV-Python and cv2_enumerate_cameras Libraries")
+    print("You Should Install OpenCV-Python and cv2-enumerate-cameras Libraries")
 try:
     import PyQt6
     import PyQt6.QtCore
@@ -102,7 +103,8 @@ class MainWindow(QMainWindow):
         self.action_TheoreticalGANsSource4.setText(_translate("MainWindow","🧱 GANs Architecture Source4"))
         self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.setText(_translate("MainWindow","☯ DL by PyTorch - Binary and Multi Category Classifications"))
         self.action_SimpleGANs.setText(_translate("MainWindow","🔰 Creating 4 Simple GANs"))
-        self.action_ConditionalGANs.setText(_translate("MainWindow","🎭 Creating Conditional GANs"))
+        self.action_ConditionalGANs.setText(_translate("MainWindow","🐦‍🔥 Creating Conditional GANs (cGAN, wGAN)"))
+        self.action_CycleGANs.setText(_translate("MainWindow","🎭 Creating Cycle GANs"))
 
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -924,7 +926,7 @@ class MainWindow(QMainWindow):
                if self.ui.comboBox_SelectStyle_NeuralStyleTransfer.findText(f) == -1 :
                   self.ui.comboBox_SelectStyle_NeuralStyleTransfer.addItem(f)
 
-        for camera_info in enumerate_cameras(cv2.CAP_MSMF):
+        for camera_info in enumerate_cameras(): # cv2.CAP_MSMF  param for windows
              cap = f"Index: {camera_info.index}, Name: {camera_info.name}, Backend: {camera_info.backend}"
              if self.ui.comboBox_SelectCameraDeepLearningFoundation.findText(cap) == -1 :
                   self.ui.comboBox_SelectCameraDeepLearningFoundation.addItem(cap)
@@ -1266,6 +1268,7 @@ class MainWindow(QMainWindow):
         self.action_DLbyPyTorchBinaryAndMultiCategoryClassifications.triggered.connect(self.changePage)
         self.action_SimpleGANs.triggered.connect(self.changePage)
         self.action_ConditionalGANs.triggered.connect(self.changePage)
+        self.action_CycleGANs.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1294,6 +1297,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode_DLbyPyTorch.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_DLbyPyTorch))
         self.ui.pushButton_SaveCode_SimpleGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_SimpleGANs))
         self.ui.pushButton_SaveCode_ConditionalGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_ConditionalGANs))
+        self.ui.pushButton_SaveCode_CycleGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CycleGANs))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1396,6 +1400,7 @@ class MainWindow(QMainWindow):
         self.DLbyPyTorchHandler = DLbyPyTorch()
         self.SimpleGANsHandler = SimpleGANs()
         self.ConditionalGANsHandler = ConditionalGANs()
+        self.CycleGANsHandler = CycleGANs()
         
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
@@ -1556,6 +1561,9 @@ class MainWindow(QMainWindow):
         self.action_ConditionalGANs = QtGui.QAction(parent=self)
         self.action_ConditionalGANs.setObjectName("action_ConditionalGANs")
         self.menu_PracticalGANs.addAction(self.action_ConditionalGANs)
+        self.action_CycleGANs = QtGui.QAction(parent=self)
+        self.action_CycleGANs.setObjectName("action_CycleGANs")
+        self.menu_PracticalGANs.addAction(self.action_CycleGANs)
 
         self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
         self.menu_TheoreticalGANsDeploymentOptimization.setObjectName("menu_TheoreticalGANsDeploymentOptimization")
@@ -1599,6 +1607,7 @@ class MainWindow(QMainWindow):
         self.FillCode(DLbyPyTorch,self.ui.textBrowser_DLbyPyTorch, 27)
         self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 77)
         self.FillCode(ConditionalGANs,self.ui.textBrowser_ConditionalGANs, 73)
+        self.FillCode(CycleGANs,self.ui.textBrowser_CycleGANs, 73)
 
 def LunchApp():
     import sys
