@@ -6,7 +6,6 @@ from os.path import isfile, join
 import time
 import shutil
 import random
-from PIL import Image
 import tkinter as tk
 import threading
 from utilities.DeepLearningFoundationOperations import DownloadLogPopup, LogEmitter
@@ -31,6 +30,7 @@ except:
     print("You Should Install numpy Library")
 try:
     import PIL
+    from PIL import Image
 except:
     print("You Should Install pillow Library")
 try:
@@ -132,11 +132,24 @@ class ConditionalGANs(QObject):
     # Method to organize the eyeglasses dataset into two folders: with glasses and without glasses
     def ArrangeEyeGlassesDataset(self):
         # Check if the dataset files and folders exist and contain enough files
-        if os.path.exists("kagglehub/train.csv") and os.path.exists("kagglehub/faces") and self.CountFilesInPath("kagglehub") >= 5002:
-            # Check if dataset needs to be arranged or is incomplete
-            if self.train == None or not os.path.exists("kagglehub/glasses/G") or not os.path.exists("kagglehub/glasses/NoG") or self.CountFilesInPath("kagglehub/glasses/NoG") < 2000 or self.CountFilesInPath("kagglehub/glasses/G") < 2000:
+        if os.path.exists("kagglehub/train.csv") and os.path.exists("kagglehub/faces") and self.CountFilesInPath("kagglehub/glasses") + self.CountFilesInPath("kagglehub/faces") >= 5002:
+            if self.train is None:
                 # Load the training metadata from CSV
                 self.train = pd.read_csv("kagglehub/train.csv")
+            # Check if dataset needs to be arranged or is incomplete
+            if not os.path.exists("kagglehub/glasses/G") or not os.path.exists("kagglehub/glasses/NoG") or self.CountFilesInPath("kagglehub/glasses/NoG") < 2000 or self.CountFilesInPath("kagglehub/glasses/G") < 2000:
+                # Create a popup window to show training logs
+                self.DownloadLogPopup = DownloadLogPopup(self.log_emitter)
+
+                # Enable the cancel button to allow stopping training
+                self.DownloadLogPopup.cancel_button.setEnabled(False)
+
+                # Display the log popup window
+                self.DownloadLogPopup.show()
+
+                # Add an initial log message to indicate training has started
+                self.DownloadLogPopup.Append_Log("Arranging the Dataset!\nWait ...")
+                
                 # Set the 'id' column as the index for easy lookup
                 self.train.set_index('id', inplace=True)
                 # Create folders for glasses and no-glasses images if they don't exist
@@ -157,7 +170,7 @@ class ConditionalGANs(QObject):
                     if os.path.exists(oldpath):
                         shutil.move(oldpath, newpath)
                 # Show a message explaining that the dataset is arranged but may need manual cleanup
-                show_scrollable_message("Dataset Arranged",
+                self.DownloadLogPopup.Append_Log("Dataset Arranged\n" +
                     "The classification column *glasses* in the file *train.csv* is not perfect.\n" +
                     "In subfolder G , most images have glasses, but about 10% of them have no glasses.\n" +
                     "Similarly, in subfolder NoG, about 10% of them actually have glasses. You need to manually fix this.\n" +
@@ -420,7 +433,7 @@ class ConditionalGANs(QObject):
             # Show a warning message prompting the user to create the model first
             QMessageBox.warning(
                 None,                          # No parent widget
-                "Model is not exist",          # Title of the warning dialog
+                "Model does not exist",          # Title of the warning dialog
                 "First, Create the Model!"     # Message body
             )
             # Return False to indicate loading failed

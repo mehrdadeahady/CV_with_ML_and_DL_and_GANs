@@ -627,12 +627,12 @@ class MainWindow(QMainWindow):
             # QMessageBox.information(None,"FashionMNIST Exist","Fashion-MINIST Dataset Already Downloaded.")
 
     def DownloadEyeGlassesDataset(self):
-        if  self.CountFilesInPath("kagglehub") < 5002:
+        if  self.CountFilesInPath("kagglehub/glasses") + self.CountFilesInPath("kagglehub/faces") < 5002:
             show_scrollable_message("Download Information:","Manually Download eyeglasses Dataset from Kaggle, Below Link:" +
                                     "\nhttps://www.kaggle.com/datasets/jeffheaton/glasses-or-no-glasses/data" +
-                                    "\nIt contains: 1) Image folder (faces-spring-2020) 2) train.csv 3) test.csv." +
+                                    "\nIt contains: 1) Image folder (faces-spring-2020) 2) train.csv 3) test.csv" +
                                     "\nThere are 5000 images in the folder /faces-spring-2020/" +
-                                    "\nAlso you adjust the Download in the Code same as Below:" +
+                                    "\nAlso you can adjust the Download in the Code same as Below:" +
                                     "\nimport kagglehub" +
                                     "\n# Download latest version" +
                                     "\npath = kagglehub.dataset_download('jeffheaton/glasses-or-no-glasses')" +
@@ -641,6 +641,29 @@ class MainWindow(QMainWindow):
                                     "\nUN-Zip the File" +
                                     "\nRename folder files to kagglehub" +
                                     "\nRename folder faces-spring-2020 to faces" +
+                                    "\nCopy it into Root of your Project.")
+        else:
+            QMessageBox.information(None,"Dataset exist","Dataset Already Downloaded.")
+
+    def DownloadCelebFacesDataset(self):
+        if  self.CountFilesInPath("kagglehub/img_align_celeba") + self.CountFilesInPath("kagglehub/black") + self.CountFilesInPath("kagglehub/blond") < 200000:
+            show_scrollable_message("Download Information:","Manually Download CelebFaces Dataset from Kaggle, Below Link:" +
+                                    "\nhttps://www.kaggle.com/datasets/jessicali9530/celeba-dataset" +
+                                    "\nIt contains: 1) list_attr_celeba.csv 2) list_bbox_celeba.csv 3) list_eval_partition.csv 4) list_landmarks_align_celeba.csv 5) img_align_celeba(Images Folder)" +
+                                    "\nThere are 202,599 images with 10,177 unique identities in the folder /img_align_celeba/" +
+                                    "\nimg_align_celeba folder located in several nested Folders, cut it and paste it in kagglehub beside .csv files" +
+                                    "\nAlso you can adjust the Download in the Code same as Below:" +
+                                    "\nimport kagglehub" +
+                                    "\nfrom kagglehub import KaggleDatasetAdapter" +
+                                    "\n# Set the path to the file you'd like to load" +
+                                    "\nfile_path = ''" +
+                                    "\n# Load the latest version" +
+                                    "\ndf = kagglehub.load_dataset(KaggleDatasetAdapter.PANDAS,'jessicali9530/celeba-dataset',file_path," +
+                                    # Provide any additional arguments like 
+                                    # sql_query or pandas_kwargs. See the 
+                                    # documenation for more information:
+                                    # https://github.com/Kaggle/kagglehub/blob/main/README.md#kaggledatasetadapterpandas
+                                    ")" +                          
                                     "\nCopy it into Root of your Project.")
         else:
             QMessageBox.information(None,"Dataset exist","Dataset Already Downloaded.")
@@ -654,6 +677,10 @@ class MainWindow(QMainWindow):
     def PrepareShowEyeGlassesImages(self):
         sender = self.sender().objectName()
         self.ConditionalGANsHandler.ShowEyeGlassesImages(sender)
+ 
+    def PrepareShowCelebFacesImages(self):
+        sender = self.sender().objectName()
+        self.CycleGANsHandler.ShowCelebFacesImages(sender)
 
     def Epochs_DLbyPyTorch_Change(self):
         total_epochs = int(self.ui.comboBox_Epochs_DLbyPyTorch.currentText().strip())
@@ -1163,6 +1190,17 @@ class MainWindow(QMainWindow):
         self.ConditionalGANsHandler.GenerateAndDisplayImages(sender)
 
     def ConnectActions(self):
+        self.ui.pushButton_ImplementingLast_cGAN_for_EyeGlasses_by_CycleGAN_CycleGANs.clicked.connect(self.CycleGANsHandler.Implementing_Last_cGAN_for_EyeGlasses_by_CycleGAN)
+        self.ui.pushButton_ShowImagesWithBlondHair_CycleGANs.clicked.connect(partial(self.CycleGANsHandler.GenerateAndDisplayImages,self.ui.pushButton_ShowImagesWithBlondHair_CycleGANs.objectName()))
+        self.ui.pushButton_ShowImagesWithDarkHair_CycleGANs.clicked.connect(partial(self.CycleGANsHandler.GenerateAndDisplayImages,self.ui.pushButton_ShowImagesWithDarkHair_CycleGANs.objectName()))
+        self.ui.pushButton_TrainModels_CycleGANs.clicked.connect(self.CycleGANsHandler.TrainModel)
+        self.ui.pushButton_Create2GeneratorModels_CycleGANs.clicked.connect(self.CycleGANsHandler.CreateGenerators)
+        self.ui.pushButton_Create2DiscriminatorModels_CycleGANs.clicked.connect(self.CycleGANsHandler.CreateDiscriminators)
+        self.ui.pushButton_PrepareDataset_CycleGANs.clicked.connect(self.CycleGANsHandler.PrepareDataset)
+        self.ui.pushButton_DisplayImagesWithBlondHair_CycleGANs.clicked.connect(self.PrepareShowCelebFacesImages)
+        self.ui.pushButton_DisplayImagesWithDarkHair_CycleGANs.clicked.connect(self.PrepareShowCelebFacesImages)
+        self.ui.pushButton_ArrangeDataset_CycleGANs.clicked.connect(self.CycleGANsHandler.ArrangeCelebFacesDataset)
+        self.ui.pushButton_DownloadDataset_CycleGANs.clicked.connect(self.DownloadCelebFacesDataset)
         self.ui.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
         self.ui.pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)
         self.ui.pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs.clicked.connect(self.PrepareSelectImagesCGANs)

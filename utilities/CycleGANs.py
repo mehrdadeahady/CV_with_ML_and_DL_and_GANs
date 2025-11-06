@@ -6,7 +6,6 @@ from os.path import isfile, join
 import time
 import shutil
 import random
-from PIL import Image
 import tkinter as tk
 import threading
 from utilities.DeepLearningFoundationOperations import DownloadLogPopup, LogEmitter
@@ -18,10 +17,10 @@ try:
     # print(tf.config.list_physical_devices('GPU'))
     import torch
     import torch.nn as nn
-    from torch.utils.data import DataLoader
+    from torch.utils.data import DataLoader, Dataset
     import torchvision
     import torchvision.transforms as T
-    from torchvision.utils import make_grid
+    from torchvision.utils import make_grid, save_image
     from torchvision.datasets import ImageFolder
 except:
     print("Check instalation of torch for Compatibility with OS and HardWare!")
@@ -31,12 +30,21 @@ except:
     print("You Should Install numpy Library")
 try:
     import PIL
+    from PIL import Image
 except:
     print("You Should Install pillow Library")
 try:
     import pandas as pd
 except:
     print("You Should Install pandas Library")
+try:
+    from tqdm import tqdm
+except:
+    print("You Should Install tqdm Library")
+try:
+    from contextlib import nullcontext
+except:
+    print("You Should Install contextlib Library")
 try:
     import cv2
     from cv2_enumerate_cameras import enumerate_cameras
@@ -48,6 +56,11 @@ try:
     from matplotlib.figure import Figure
 except:
     print("You Should Install matplotlib Library!")
+try:
+    import albumentations
+    from albumentations.pytorch import ToTensorV2
+except:
+    print("You Should Install albumentations Library with below flag to avoid installing opencv headless causing confilict.\npip install albumentations --no-deps\nthen install one of its dependencies:\npip install albucore==0.0.24  --no-deps")
 try: 
     from PyQt6.QtGui import  QTextCursor   
     from PyQt6.QtCore import QObject, pyqtSignal, QThread, Qt
@@ -55,119 +68,150 @@ try:
 except:
     print("You Should Install PyQt6 Library!")
 
-# Define the ConditionalGANs class, which inherits from QObject to support Qt signals and slots
+# Define the CycleGANs class, which inherits from QObject to support Qt signals and slots
 class CycleGANs(QObject):
 
-    # Constructor method to initialize the ConditionalGANs instance
+    # Constructor method to initialize the CycleGANs instance
     def __init__(self, parent=None):
-        # parent: optional reference to a parent QObject, used in Qt applications
-
-        # Call the constructor of the parent QObject class
+        # parent: optional reference to a parent QObject, used in Qt applications for signal-slot management
+        # Call the constructor of the parent QObject class to enable Qt signal-slot functionality
         super().__init__()
 
-        # Set a fixed random seed for reproducibility in training and generation
+        # Set a fixed random seed to ensure reproducibility across training runs and model outputs
         torch.manual_seed(0)
 
-        # Initialize placeholder for training data (will be loaded later)
+        # Placeholder for training data; will be assigned later during data loading
         self.train = None
 
-        # Define path to dataset containing images with eyeglasses
-        self.G = 'kagglehub/glasses/G/'
+        # Placeholder for a DataFrame to hold metadata or structured information about the dataset
+        self.dataframe = None
 
-        # Define path to dataset containing images without eyeglasses
-        self.NoG = 'kagglehub/glasses/NoG/'
-
-        # Set the number of images to process in each training batch
-        self.batch_size = 16
-
-        # Set the target image size (height and width) for preprocessing
-        self.imagesSize = 256
-
-        # Define a transformation pipeline to preprocess images:
-        # - Resize to the target dimensions
-        # - Convert to tensor format
-        # - Normalize pixel values to the range [-1, 1]
-        self.transform = T.Compose([
-            # Resize each image to (256, 256)
-            T.Resize((self.imagesSize, self.imagesSize)),
-            # Convert image to PyTorch tensor
-            T.ToTensor(),
-            # Normalize RGB channels to mean=0, std=1 (range [-1, 1])
-            T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-        ])
-
-        # Initialize placeholder for the dataset object
-        self.data_set = None
-
-        # Create an empty list to hold combined image-label pairs
-        self.combined_data = []
-
-        # Initialize placeholder for the DataLoader used during training
-        self.data_loader = None
-
-        # Create a custom log emitter to send messages to the UI or console
+        # Instantiate a custom log emitter to handle logging messages via Qt signals
         self.log_emitter = LogEmitter()
 
+        # Define a sequence of image transformations using Albumentations for preprocessing
+        self.transforms = albumentations.Compose(
+            [
+                # Resize all images to 256x256 pixels for uniform input dimensions
+                albumentations.Resize(width=256, height=256),
+
+                # Apply horizontal flip augmentation with a 50% probability to increase data diversity
+                albumentations.HorizontalFlip(p=0.5),
+
+                # Normalize image pixel values to the range [-1, 1] using mean and std deviation
+                albumentations.Normalize(
+                    mean=[0.5, 0.5, 0.5],              # Mean normalization for RGB channels
+                    std=[0.5, 0.5, 0.5],               # Standard deviation for RGB channels
+                    max_pixel_value=255                # Maximum pixel value in the input images
+                ),
+
+                # Convert image and associated data to PyTorch tensors
+                ToTensorV2()
+            ],
+            # Specify additional target for transformation, e.g., a second image input
+            additional_targets={"image0": "image"}
+        )
+
+        # Placeholder for the data loader that will feed batches of data during training
+        self.loader = None
+
+        # Placeholder for the dataset object that will be used to store and manage image data
+        self.dataset = None
+
         # Set the device for computation: use GPU if available, otherwise fallback to CPU
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Initialize placeholder for the generator model (will be defined later)
-        self.generator = None
+        # Placeholder for Generator A (e.g., transforms domain A to domain B)
+        self.generator_A = None
 
-        # Initialize placeholder for the critic/discriminator model (will be defined later)
-        self.critic = None
+        # Placeholder for Generator B (e.g., transforms domain B to domain A)
+        self.generator_B = None
 
-        # Set the dimensionality of the latent noise vector used for image generation
-        self.z_dim = 100
+        # Placeholder for Discriminator A (evaluates realism of images in domain A)
+        self.discriminator_A = None
 
-        # Placeholder for males with glasses
-        self.z_male_g = None
-        # Placeholder for females with glasses
-        self.z_female_g = None
-        # Placeholder for males without glasses
-        self.z_male_ng = None
-        # Placeholder for females without glasses
-        self.z_female_ng = None
-   
-    # Method to organize the eyeglasses dataset into two folders: with glasses and without glasses
-    def ArrangeEyeGlassesDataset(self):
-        # Check if the dataset files and folders exist and contain enough files
-        if os.path.exists("kagglehub/train.csv") and os.path.exists("kagglehub/faces") and self.CountFilesInPath("kagglehub") >= 5002:
-            # Check if dataset needs to be arranged or is incomplete
-            if self.train == None or not os.path.exists("kagglehub/glasses/G") or not os.path.exists("kagglehub/glasses/NoG") or self.CountFilesInPath("kagglehub/glasses/NoG") < 2000 or self.CountFilesInPath("kagglehub/glasses/G") < 2000:
-                # Load the training metadata from CSV
-                self.train = pd.read_csv("kagglehub/train.csv")
-                # Set the 'id' column as the index for easy lookup
-                self.train.set_index('id', inplace=True)
-                # Create folders for glasses and no-glasses images if they don't exist
-                os.makedirs(self.G, exist_ok=True)
-                os.makedirs(self.NoG, exist_ok=True)
-                # Define the source folder containing face images
-                folder = 'kagglehub/faces'
-                # Loop through image IDs and sort them based on the 'glasses' label
-                for i in range(1, 4501):
-                    # Construct the original image path
-                    oldpath = f"{folder}face-{i}.png"
-                    # Determine the destination path based on the glasses label
-                    if self.train.loc[i]['glasses'] == 0:
-                        newpath = f"{self.NoG}face-{i}.png"
-                    elif self.train.loc[i]['glasses'] == 1:
-                        newpath = f"{self.G}face-{i}.png"
-                    # Move the image if it exists
-                    if os.path.exists(oldpath):
-                        shutil.move(oldpath, newpath)
-                # Show a message explaining that the dataset is arranged but may need manual cleanup
-                show_scrollable_message("Dataset Arranged",
-                    "The classification column *glasses* in the file *train.csv* is not perfect.\n" +
-                    "In subfolder G , most images have glasses, but about 10% of them have no glasses.\n" +
-                    "Similarly, in subfolder NoG, about 10% of them actually have glasses. You need to manually fix this.\n" +
-                    "This is important for training so :\n" +
-                    "Manually move images in the two folders so that one contains only images with glasses and the other images without glasses.\n" +
-                    "Fixing data problems is part of daily routine of data scientist!")
-            # If dataset is already arranged, show confirmation
+        # Placeholder for Discriminator B (evaluates realism of images in domain B)
+        self.discriminator_B = None
+
+    # Method to organize the CelebA dataset into two folders based on hair color: black and blond
+    def ArrangeCelebFacesDataset(self):
+        # Check if all required metadata files exist and the total number of image files exceeds 200,000
+        if os.path.exists("kagglehub/list_attr_celeba.csv") and \
+        os.path.exists("kagglehub/list_bbox_celeba.csv") and \
+        os.path.exists("kagglehub/list_eval_partition.csv") and \
+        os.path.exists("kagglehub/list_landmarks_align_celeba.csv") and \
+        self.CountFilesInPath("kagglehub/img_align_celeba") + \
+        self.CountFilesInPath("kagglehub/black") + \
+        self.CountFilesInPath("kagglehub/blond") > 200000:
+
+            # Load the attribute CSV into a DataFrame if it hasn't been loaded yet
+            if self.dataframe is None:
+                self.dataframe = pd.read_csv("kagglehub/list_attr_celeba.csv")
+
+            # Check if the target folders exist and contain enough images; if not, proceed to arrange
+            if not os.path.exists("kagglehub/black") or \
+            not os.path.exists("kagglehub/blond") or \
+            self.CountFilesInPath("kagglehub/black") < 10000 or \
+            self.CountFilesInPath("kagglehub/blond") < 10000:
+
+                # Create a popup window to display dataset arrangement logs
+                self.DownloadLogPopup = DownloadLogPopup(self.log_emitter)
+
+                # Disable the cancel button during dataset arrangement to prevent interruption
+                self.DownloadLogPopup.cancel_button.setEnabled(False)
+
+                # Show the popup window to the user
+                self.DownloadLogPopup.show()
+
+                # Append a log message indicating that dataset arrangement has started
+                self.DownloadLogPopup.Append_Log("Arranging the Dataset!\nWait ...")
+
+                # Create directories for black and blond hair categories if they don't exist
+                os.makedirs("kagglehub/black", exist_ok=True)
+                os.makedirs("kagglehub/blond", exist_ok=True)
+
+                # Define the source folder containing the original aligned CelebA images
+                folder = "kagglehub/img_align_celeba"
+
+                # Iterate over each row in the attribute DataFrame
+                for i in range(len(self.dataframe)):
+                    # Extract the current row (image attributes and ID)
+                    dfi = self.dataframe.iloc[i]
+
+                    # Check if the image is labeled as having black hair
+                    if dfi['Black_Hair'] == 1:
+                        try:
+                            # Construct the source and destination paths for the image
+                            oldpath = f"{folder}/{dfi['image_id']}"
+                            newpath = f"kagglehub/black/{dfi['image_id']}"
+
+                            # Move the image from the source to the black hair folder
+                            shutil.move(oldpath, newpath)
+                        except:
+                            # Silently ignore any errors during file move
+                            pass
+
+                    # Check if the image is labeled as having blond hair
+                    elif dfi['Blond_Hair'] == 1:
+                        try:
+                            # Construct the source and destination paths for the image
+                            oldpath = f"{folder}/{dfi['image_id']}"
+                            newpath = f"kagglehub/blond/{dfi['image_id']}"
+
+                            # Move the image from the source to the blond hair folder
+                            shutil.move(oldpath, newpath)
+                        except:
+                            # Silently ignore any errors during file move
+                            pass
+
+                # Append a log message indicating successful dataset arrangement
+                self.DownloadLogPopup.Append_Log("Dataset Arranged successfully.")
+
+            # If dataset is already arranged, show an informational message to the user
             else:
-                QMessageBox.information(None, "Dataset aaranged", "Dataset Already Arranged.")
-        # If required files are missing, prompt the user to download and copy the dataset
+                QMessageBox.information(None, "Dataset arranged", "Dataset Already Arranged.")
+
+        # If required files are missing or dataset is incomplete, prompt the user to download it
         else:
             QMessageBox.information(None, "No Dataset", "First, Download and Copy the Dataset to the root of Project.")
 
@@ -187,821 +231,441 @@ class CycleGANs(QObject):
         else:
             return 0
 
-    # Method to display a sample of images with or without glasses based on the sender button
-    def ShowEyeGlassesImages(self, sender):
-        # Initialize the directory variable
-        directory = None
-        # Match the sender to determine which folder to display
-        match sender:
-            # If the button is for displaying images with glasses
-            case "pushButton_DisplayImagesWithGlasses_ConditionalGANs":
-                directory = self.G
-            # If the button is for displaying images without glasses
-            case "pushButton_DisplayImagesWithoutGlasses_ConditionalGANs":
-                directory = self.NoG
+    # Method to display a sample of CelebA images based on hair color, triggered by a UI button
+    def ShowCelebFacesImages(self, sender):
+        # Check if both black and blond hair folders exist and contain sufficient images
+        if os.path.exists("kagglehub/black") and \
+        os.path.exists("kagglehub/blond") and \
+        self.CountFilesInPath("kagglehub/black") > 10000 and \
+        self.CountFilesInPath("kagglehub/blond") > 10000:
 
-        # List all image filenames in the selected directory
-        imgs = os.listdir(directory)
-        # Set a fixed seed for reproducible sampling
-        random.seed(42)
-        # Randomly select 16 image filenames from the directory
-        samples = random.sample(imgs, 16)
-        # Create a figure to display the images
-        fig = plt.figure(dpi=100, figsize=(8, 2))
-        # Loop through the selected samples and display each image
-        for i in range(16):
-            # Create a subplot for each image
-            ax = plt.subplot(2, 8, i + 1)
-            # Open the image file
-            img = Image.open(f"{directory}{samples[i]}")
-            # Display the image
-            plt.imshow(img)
-            # Remove x and y axis ticks
-            plt.xticks([])
-            plt.yticks([])
-        # Adjust spacing between subplots
-        plt.subplots_adjust(wspace=-0.01, hspace=-0.01)
-        # Show the final image grid
-        plt.show()
-   
-    # Method to add one-hot and tensor labels to each image in the dataset
-    def AddLabels(self):
-        # Check if training metadata and image folders are available and contain enough images
-        if self.train is not None and os.path.exists("kagglehub/glasses/G") and os.path.exists("kagglehub/glasses/NoG") and self.CountFilesInPath("kagglehub/glasses/NoG") > 2000 and self.CountFilesInPath("kagglehub/glasses/G") > 2000:
-            # Proceed only if labels haven't already been added
-            if len(self.combined_data) <= 0:
-                # Load images from both folders using torchvision's ImageFolder
-                self.data_set = torchvision.datasets.ImageFolder(root=r"kagglehub/glasses", transform=self.transform)
+            # Initialize variables to hold the selected folder path and display title
+            trainGroup = None
+            title = ""
 
-                # Initialize a popup window to show log messages during label processing
-                self.DownloadLogPopup = DownloadLogPopup(self.log_emitter)
+            # Determine which button was pressed to select the appropriate image group
+            match sender:
+                # If the button for black hair images was pressed
+                case "pushButton_DisplayImagesWithDarkHair_CycleGANs":
+                    trainGroup = "kagglehub/black/"
+                    title = "Images with Black Hair"
 
-                # Enable the cancel button in the popup
-                self.DownloadLogPopup.cancel_button.setEnabled(True)
+                # If the button for blond hair images was pressed
+                case "pushButton_DisplayImagesWithBlondHair_CycleGANs":
+                    trainGroup = "kagglehub/blond/"
+                    title = "Images with Blond Hair"
 
-                # Display the popup window
-                self.DownloadLogPopup.show()
+            # List all image filenames in the selected folder
+            imgs = os.listdir(trainGroup)
 
-                # Log the start of the labeling process
-                self.DownloadLogPopup.Append_Log("Adding Labels Started!\nIt takes several minutes.\nWait ...")
-                                    
-                # Iterate over the dataset to assign labels and prepare augmented image data
-                for i, (img, label) in enumerate(self.data_set):
+            # Set a fixed seed for random sampling to ensure consistent results
+            random.seed(42)
 
-                    # Create a one-hot encoded label vector of size 2 (e.g., [1, 0] for class 0, [0, 1] for class 1)
-                    onehot = torch.zeros((2))
-                    
-                    # Set the appropriate index in the one-hot vector to 1 based on the label
-                    onehot[label] = 1
+            # Randomly select 8 image filenames from the folder
+            samples = random.sample(imgs, 8)
 
-                    # Initialize a tensor to hold two label-specific channels, same spatial size as the image
-                    channels = torch.zeros((2, self.imagesSize, self.imagesSize))
+            # Prepare folder and image lists for indexed access
+            fs = [trainGroup]  # List of folder paths (only one in this case)
+            ps = [imgs]        # List of image filename lists (only one in this case)
 
-                    # If the label is 0, fill the first channel with ones
-                    if label == 0:
-                        channels[0, :, :] = 1
+            # Create a matplotlib figure with a title and specified resolution and size
+            fig = plt.figure(title, dpi=100, figsize=(1.78 * 8, 2.18 * 2))
 
-                    # Otherwise, fill the second channel with ones
-                    else:
-                        channels[1, :, :] = 1
+            # Loop through the 8 selected images to display them in a subplot grid
+            for i in range(8):
+                # Create a subplot in a 1-row, 8-column layout
+                ax = plt.subplot(1, 8, i + 1)
 
-                    # Concatenate the original image with the label channels along the channel dimension
-                    img_and_label = torch.cat([img, channels], dim=0)
+                # Determine folder index (always 0 here since only one folder is used)
+                folder = i // 8
 
-                    # Append the original image, label, one-hot vector, and concatenated image-label tensor to the combined dataset
-                    self.combined_data.append((img, label, onehot, img_and_label))
+                # Determine image index within the selected sample
+                p = i % 8
 
-                # Log the completion of the labeling process
-                self.DownloadLogPopup.Append_Log("Adding Labels finished.\nNow prepare the Dataset.")
-            # If labels are already added, show a message
-            else:
-                QMessageBox.information(None, "Labels are Ready", "Labels already added.")
-        # If dataset is not ready, prompt the user to prepare it first
+                # Open the image file using PIL
+                img = Image.open(fr"{fs[folder]}{ps[folder][p]}")
+
+                # Display the image in the subplot
+                plt.imshow(img)
+
+                # Remove x-axis ticks for a cleaner display
+                plt.xticks([])
+
+                # Remove y-axis ticks for a cleaner display
+                plt.yticks([])
+
+            # Adjust spacing between subplots to minimize gaps
+            plt.subplots_adjust(wspace=-0.01, hspace=-0.1)
+
+            # Show the final image grid to the user
+            plt.show()
+
+        # If dataset folders are missing or insufficiently populated, show an error message
         else:
-            QMessageBox.information(None, "Dataset is not Ready", "First, Download and Copy the Dataset to the root of Project and Arrange it.")
-
-    # Method to prepare the dataset for training by creating a DataLoader
-    def PrepareDataset(self):
-        # Proceed only if labeled data is available
-        if len(self.combined_data) > 0:
-            # Create a DataLoader to batch and shuffle the labeled data
-            self.data_loader = torch.utils.data.DataLoader(
-                self.combined_data,
-                batch_size = self.batch_size,
-                shuffle = True
+            QMessageBox.information(
+                None,
+                "No Dataset",
+                "First, Download and Copy the Dataset to the root of Project and Arrange it."
             )
-            # Notify the user that the dataset is ready for training
-            QMessageBox.information(None, "Dataset Prepared", "Dataset Prepared, ready for training.")
-        # If labels are not added yet, prompt the user to add them first
+
+    # Method to prepare the CelebA dataset for training by creating a PyTorch DataLoader
+    def PrepareDataset(self):
+        # Check if both black and blond hair folders exist and contain sufficient images
+        if os.path.exists("kagglehub/black") and \
+        os.path.exists("kagglehub/blond") and \
+        self.CountFilesInPath("kagglehub/black") > 10000 and \
+        self.CountFilesInPath("kagglehub/blond") > 10000:
+
+            # Proceed only if the DataLoader hasn't already been initialized
+            if self.loader is None:
+                # Create a custom dataset object using the black and blond hair image folders
+                self.dataset = LoadData(
+                    root_A=["kagglehub/black"],     # Source domain A: images with black hair
+                    root_B=["kagglehub/blond"],     # Target domain B: images with blond hair
+                    transform=self.transforms       # Apply predefined image transformations
+                )
+
+                # Wrap the dataset in a PyTorch DataLoader for efficient batch loading
+                self.loader = DataLoader(
+                    self.dataset,                   # Dataset object containing paired images
+                    batch_size=1,                   # Load one image pair per batch
+                    shuffle=True,                   # Shuffle data to improve training robustness
+                    pin_memory=self.device == "cuda"  # Optimize memory transfer if using GPU
+                )
+
+                # Notify the user that the dataset is ready for training
+                QMessageBox.information(None, "Dataset Prepared", "Dataset Prepared, ready for training.")
+
+            # If the DataLoader is already initialized, inform the user
+            else:
+                QMessageBox.information(None, "Dataset Prepared", "Dataset already Prepared.")
+
+        # If dataset folders are missing or insufficiently populated, show an error message
         else:
-            QMessageBox.information(None, "Labels are not Ready", "First, Add Labels.")
+            QMessageBox.information(
+                None,
+                "No Dataset",
+                "First, Download and Copy the Dataset to the root of Project and Arrange it."
+            )
 
-    # Method to initialize weights of model layers using custom rules
+    # Method to initialize weights of model layers using custom rules for different layer types
     def weights_init(self, m):
-        # m: a layer/module from the model passed during initialization
+        # Retrieve the class name of the layer/module passed as argument
+        name = m.__class__.__name__
 
-        # Get the class name of the layer to identify its type
-        classname = m.__class__.__name__
-
-        # If the layer is a convolutional layer, initialize weights with normal distribution (mean=0, std=0.02)
-        if classname.find('Conv') != -1:
+        # Check if the layer is a convolutional or linear (fully connected) layer
+        if name.find('Conv') != -1 or name.find('Linear') != -1:
+            # Initialize weights with a normal distribution (mean=0.0, std=0.02)
             nn.init.normal_(m.weight.data, 0.0, 0.02)
 
-        # If the layer is a batch normalization layer, initialize weights and biases
-        elif classname.find('BatchNorm') != -1:
-            # Initialize weights with normal distribution (mean=1, std=0.02)
-            nn.init.normal_(m.weight.data, 1.0, 0.02)
-            # Set bias values to zero
+            # Initialize biases to zero
             nn.init.constant_(m.bias.data, 0)
 
-    # Method to create generator and critic models and initialize their weights
-    def CreateModels_InitializeWeights(self):
-        # Check if models haven't been created yet
-        if self.generator is None or self.critic is None:
-            # Set number of image channels (RGB = 3)
-            img_channels = 3
+        # Check if the layer is a 2D normalization layer (e.g., BatchNorm2d)
+        elif name.find('Norm2d') != -1:
+            # Initialize weights to 1 for normalization scaling
+            nn.init.constant_(m.weight.data, 1)
 
-            # Set base number of features for model layers
-            features = 16
+            # Initialize biases to zero for normalization offset
+            nn.init.constant_(m.bias.data, 0)
 
-            # Create the generator model with input size = latent vector + label channels
-            self.generator = Generator(self.z_dim + 2, img_channels, features).to(self.device)
+    # Method to create discriminator models for both domains and initialize their weights
+    def CreateDiscriminators(self):
+        # Check if discriminator models haven't been instantiated yet
+        if self.discriminator_A is None or self.discriminator_B is None:
+            # Instantiate Discriminator A (e.g., for domain A) and move it to the selected device (CPU/GPU)
+            self.discriminator_A = Discriminator().to(self.device)
 
-            # Create the critic (discriminator) model with input size = image channels + label channels
-            self.critic = Critic(img_channels + 2, features).to(self.device)
+            # Instantiate Discriminator B (e.g., for domain B) and move it to the selected device (CPU/GPU)
+            self.discriminator_B = Discriminator().to(self.device)
 
-            # Initialize weights of the generator using the custom method
-            self.weights_init(self.generator)
+            # Apply custom weight initialization to Discriminator A
+            self.weights_init(self.discriminator_A)
 
-            # Initialize weights of the critic using the custom method
-            self.weights_init(self.critic)
+            # Apply custom weight initialization to Discriminator B
+            self.weights_init(self.discriminator_B)
 
-            # Show a message indicating models were created and initialized
-            QMessageBox.information(None, "Models Created", "Models created and weights initialized.")
-        # If models already exist, notify the user
+            # Display a message box to inform the user that discriminators were created and initialized
+            QMessageBox.information(
+                None,
+                "Discriminator models Created",
+                "Discriminator models created and weights initialized."
+            )
+
+        # If discriminator models already exist, notify the user to avoid redundant creation
         else:
-            QMessageBox.information(None, "Models Exist", "Models already created and weights initialized.")
+            QMessageBox.information(
+                None,
+                "Discriminator models Exist",
+                "Discriminator models already created and weights initialized."
+            )
 
-    # Method to start training the Conditional GAN model
+    # Method to create generator models for both domains and initialize their weights
+    def CreateGenerators(self):
+        # Check if generator models haven't been instantiated yet
+        if self.generator_A is None or self.generator_B is None:
+            # Instantiate Generator A (e.g., transforms images from domain A to domain B)
+            # Set input image channels to 3 (RGB) and use 9 residual blocks for deeper learning
+            self.generator_A = Generator(img_channels=3, num_residuals=9).to(self.device)
+
+            # Instantiate Generator B (e.g., transforms images from domain B to domain A)
+            # Same configuration as Generator A
+            self.generator_B = Generator(img_channels=3, num_residuals=9).to(self.device)
+
+            # Apply custom weight initialization to Generator A
+            self.weights_init(self.generator_A)
+
+            # Apply custom weight initialization to Generator B
+            self.weights_init(self.generator_B)
+
+            # Display a message box to inform the user that generators were created and initialized
+            QMessageBox.information(
+                None,
+                "Generator models Created",
+                "Generator models created and weights initialized."
+            )
+
+        # If generator models already exist, notify the user to avoid redundant creation
+        else:
+            QMessageBox.information(
+                None,
+                "Generator models Exist",
+                "Generator models already created and weights initialized."
+            )
+
+    # Method to start training the CycleGAN model using prepared data and initialized models
     def TrainModel(self):
         # Check if the training dataset has been prepared
-        if self.data_loader is None:
-            # Warn the user to prepare the dataset first
+        if self.loader is None:
+            # Warn the user to prepare the dataset before starting training
             QMessageBox.warning(None, "Data is not Ready", "First, Prepare the Dataset!")
 
-        # Check if both Generator and Discriminator models are created
-        elif self.generator is None or self.critic is None:
-            # Warn the user to create the models first
+        # Check if both Generator and Discriminator models have been created
+        elif self.generator_A is None or \
+            self.generator_B is None or \
+            self.discriminator_A is None or \
+            self.discriminator_B is None:
+            # Warn the user to create the models before starting training
             QMessageBox.warning(None, "No Models Exist", "First, Create Models!")
 
-        # If data and models are ready
+        # If both data and models are ready, proceed with training
         else:
-            # Create a window to visualize training progress
-            self.plot_window = PlotWindow(self.device, self.generator, self.z_dim)
+            # Create a window to visualize training progress in real time
+            self.plot_window = PlotWindow()
 
-            # Display the plot window
+            # Display the plot window to the user
             self.plot_window.show()
 
-            # Create a popup window to show training logs
+            # Create a popup window to show training logs and allow cancellation
             self.DownloadLogPopup = DownloadLogPopup(self.log_emitter)
 
-            # Enable the cancel button to allow stopping training
+            # Enable the cancel button to allow user to stop training if needed
             self.DownloadLogPopup.cancel_button.setEnabled(True)
 
             # Display the log popup window
             self.DownloadLogPopup.show()
 
-            # Add an initial log message to indicate training has started
+            # Add an initial log message to indicate that training has started
             self.DownloadLogPopup.Append_Log("Training Models!\nWait ...")
 
-            # Create a separate thread to handle training asynchronously
-            self.training_thread = TrainingConditionalGANsThread(
-                # Reference to the plot window for visual updates
-                self.plot_window,
-
-                # Reference to the log popup for status updates
-                self.DownloadLogPopup,
-
-                # Batch size used during training
-                self.batch_size,
-
-                # Device to run training on (CPU or GPU)
-                self.device,
-
-                # Discriminator model for training
-                self.critic,
-
-                # Generator model for training
-                self.generator,
-
-                # DataLoader containing the training data
-                self.data_loader,
-
-                # Dimensionality of the latent noise vector
-                self.z_dim
+            # Create a separate thread to run the training process asynchronously
+            self.training_thread = TrainingCycleGANsThread(
+                self.plot_window,             # Reference to the plot window for visual updates
+                self.DownloadLogPopup,        # Reference to the log popup for status updates
+                self.generator_A,             # Generator A model
+                self.generator_B,             # Generator B model
+                self.discriminator_A,         # Discriminator A model
+                self.discriminator_B,         # Discriminator B model
+                self.loader,                  # DataLoader containing training data
+                self.device                   # Device to run training on (CPU or GPU)
             )
 
-            # Connect the thread's log signal to the log popup's append method
+            # Connect the training thread's log signal to the log popup's append method
             self.training_thread.log_signal.connect(self.DownloadLogPopup.Append_Log)
 
-            # Connect the thread's display signal to the plot window's display method
-            self.training_thread.display_signal.connect(self.plot_window.plot_epoch)
+            # Connect the training thread's display signal to the plot window's plot method
+            self.training_thread.display_signal.connect(self.plot_window.plot)
 
-            # Connect the cancel button to the thread's stop method to allow interruption
+            # Connect the cancel button to the thread's stop method to allow user interruption
             self.DownloadLogPopup.cancel_button.clicked.connect(self.training_thread.stop)
 
-            # Start the training thread
+            # Start the training thread to begin model training
             self.training_thread.start()
 
-    # Method to load a previously trained Generator model from disk
+    # Method to load previously trained Generator models from disk and prepare them for inference
     def LoadTrainedModel(self):
-        # Check if the generator model has been created
-        if self.generator is None:
-            # Show a warning message prompting the user to create the model first
-            QMessageBox.warning(
-                None,                          # No parent widget
-                "Model is not exist",          # Title of the warning dialog
-                "First, Create the Model!"     # Message body
-            )
-            # Return False to indicate loading failed
+        # Check if the training dataset has been prepared
+        if self.loader is None:
+            # Warn the user to prepare the dataset before attempting to load models
+            QMessageBox.warning(None, "Data is not Ready", "First, Prepare the Dataset!")
+            # Return False to indicate that loading cannot proceed
             return False
+
+        # Check if both Generator models have been instantiated
+        elif self.generator_A is None or self.generator_B is None:
+            # Warn the user to create the generator models before loading weights
+            QMessageBox.warning(None, "No Models Exist", "First, Create Generator Models!")
+            # Return False to indicate that loading cannot proceed
+            return False
+
+        # Proceed if dataset and models are ready
         else:
-            # Check if the saved Generator model file exists on disk
-            if os.path.exists("resources/models/conditional_gan.pth"):
-                # Load the model weights into the generator
-                self.generator.load_state_dict(torch.load("resources/models/conditional_gan.pth",
-                                                          map_location=self.device))
-                # Set the generator to evaluation mode
-                self.generator.eval()
-                # Return True to indicate successful loading
+            # Check if both saved Generator model files exist on disk
+            if os.path.exists("resources/models/gen_black.pth") and \
+            os.path.exists("resources/models/gen_blond.pth"):
+
+                # Load the saved weights into Generator A (black hair model)
+                self.generator_A.load_state_dict(
+                    torch.load("resources/models/gen_black.pth", map_location=self.device)
+                )
+
+                # Load the saved weights into Generator B (blond hair model)
+                self.generator_B.load_state_dict(
+                    torch.load("resources/models/gen_blond.pth", map_location=self.device)
+                )
+
+                # Move Generator A to the appropriate device and set to evaluation mode
+                self.generator_A.to(self.device).eval()
+
+                # Move Generator B to the appropriate device and set to evaluation mode
+                self.generator_B.to(self.device).eval()
+
+                # Return True to indicate successful model loading
                 return True
-            # If the model file does not exist
+
+            # If either model file is missing, notify the user
             else:
-                # Show a warning message prompting the user to train and save the model first
                 QMessageBox.warning(
-                    None,                          # No parent widget
-                    "Model not Saved",             # Title of the warning dialog
-                    "First, Train and Save the Model!"  # Message body
+                    None,                          # No parent widget specified
+                    "Models not Saved",            # Title of the warning dialog
+                    "First, Train and Save the Models!"  # Message body prompting user action
                 )
                 # Return False to indicate loading failed
                 return False
 
-    # Handles image generation and visualization based on the selected UI button.
+    # Handles image generation and visualization based on the selected UI button
     def GenerateAndDisplayImages(self, sender):
-        # Checks if the trained model is loaded; exits early if not
+        # Check if the trained generator models are loaded; exit early if not
         if not self.LoadTrainedModel():
-            # Stops execution if model loading failed
             return
-               
-        # Generates random noise for the "genuine" image batch with shape (32, z_dim, 1, 1)
-        noise_g = torch.randn(32, self.z_dim, 1, 1)
-        
-        # Initializes a tensor of zeros for the "genuine" image labels with shape (32, 2, 1, 1)
-        labels_g = torch.zeros(32, 2, 1, 1)
-        
-        # Sets the first label channel to 1 for all "genuine" images
-        labels_g[:,0,:,:] = 1
-        
-        # Generates random noise for the "non-genuine" image batch with shape (32, z_dim, 1, 1)
-        noise_ng = torch.randn(32, self.z_dim, 1, 1)
-        
-        # Initializes a tensor of zeros for the "non-genuine" image labels with shape (32, 2, 1, 1)
-        labels_ng = torch.zeros(32, 2, 1, 1)
-        
-        # Sets the second label channel to 1 for all "non-genuine" images
-        labels_ng[:,1,:,:] = 1
-        
-        # Defines a list of weights for interpolation or blending purposes
-        weights = [0, 0.25, 0.5, 0.75, 1]
 
+        # Ensure the dataset contains at least 8 samples for visualization
+        if len(self.dataset) < 8:
+            print("Not enough samples in dataset to generate 8 images.")
+            return
 
-        # Match sender input to determine generation logic
+        # Randomly select 8 samples from the dataset
+        indices = random.sample(range(len(self.dataset)), 8)
+        selected_samples = [self.dataset[i] for i in indices]
+
+        # Initialize input batch and generator reference
+        input_batch = []
+        generator = None
+
+        # Determine which generator to use based on the sender button
         match sender:
-            # Case 1: Generate 32 images with glasses
-            case "pushButton_SelectImagesWithEyeGlasses_ConditionalGANs":   
-                # Concatenates noise and labels along the channel dimension and moves the tensor to the selected device
-                noise_and_labels = torch.cat([noise_g, labels_g], dim=1).to(self.device)
-                
-                # Passes the combined tensor through the generator to produce fake images, then moves them to CPU and detaches from computation graph
-                fake = self.generator(noise_and_labels).cpu().detach()
-                
-                # Stores the first noise vector (assumed to represent a male image) for later use
-                self.z_male_g = noise_g[0]
-                
-                # Stores the 15th noise vector (assumed to represent a female image) for later use
-                self.z_female_g = noise_g[14]
-                
-                # Initializes a matplotlib figure with specified size and resolution
-                plt.figure(figsize=(20, 10), dpi=50)
-                
-                # Loops through all 32 generated images
-                for i in range(32):
-                    # Creates a subplot in a 4x8 grid for each image
-                    ax = plt.subplot(4, 8, i + 1)
-                    
-                    # Normalizes the image tensor and rearranges dimensions for display (channels last)
-                    img = (fake[i] / 2 + 0.5).permute(1, 2, 0)
-                    
-                    # Displays the image using matplotlib
-                    plt.imshow(img.numpy())
-                    
-                    # Removes x-axis ticks for cleaner visualization
-                    plt.xticks([])
-                    
-                    # Removes y-axis ticks for cleaner visualization
-                    plt.yticks([])
-                
-                # Adjusts spacing between subplots to reduce whitespace
-                plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                
-                # Renders the final image grid to the screen
-                plt.show()
+            # If the button for generating images with dark hair was pressed
+            case "pushButton_ShowImagesWithDarkHair_CycleGANs":
+                # Extract black hair images from the selected samples
+                input_batch = [black.unsqueeze(0) for black, _ in selected_samples]
+                generator = self.generator_A
 
-            # Case 2: Generate 32 images without glasses
-            case "pushButton_SelectImagesWithoutEyeGlasses_ConditionalGANs":
-                # Concatenates noise and labels along the channel dimension and moves the tensor to the selected device
-                noise_and_labels = torch.cat([noise_ng, labels_ng], dim=1).to(self.device)
-                
-                # Passes the combined tensor through the generator to produce fake images, then moves them to CPU and detaches from computation graph
-                fake = self.generator(noise_and_labels).cpu().detach()
-                
-                # Stores the 9th noise vector (assumed to represent a male image) for later use
-                self.z_male_ng = noise_ng[8]
-                
-                # Stores the 32nd noise vector (assumed to represent a female image) for later use
-                self.z_female_ng = noise_ng[31]
-                
-                # Initializes a matplotlib figure with specified size and resolution
-                plt.figure(figsize=(20, 10), dpi=50)
-                
-                # Loops through all 32 generated images
-                for i in range(32):
-                    # Creates a subplot in a 4x8 grid for each image
-                    ax = plt.subplot(4, 8, i + 1)
-                    
-                    # Normalizes the image tensor and rearranges dimensions for display (channels last)
-                    img = (fake[i] / 2 + 0.5).permute(1, 2, 0)
-                    
-                    # Displays the image using matplotlib
-                    plt.imshow(img.numpy())  # Optional: could be upscaled with .repeat if uncommented
-                    
-                    # Removes x-axis ticks for cleaner visualization
-                    plt.xticks([])
-                    
-                    # Removes y-axis ticks for cleaner visualization
-                    plt.yticks([])
-                
-                # Adjusts spacing between subplots to reduce whitespace
-                plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                
-                # Renders the final image grid to the screen
-                plt.show()
+            # If the button for generating images with blond hair was pressed
+            case "pushButton_ShowImagesWithBlondHair_CycleGANs":
+                # Extract blond hair images from the selected samples
+                input_batch = [blond.unsqueeze(0) for _, blond in selected_samples]
+                generator = self.generator_B
 
-            # Case 3: Transition female with glasses → without glasses
-            case "pushButton_TransitionFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs":
-                # Checks if the female image with glasses has been previously generated
-                if self.z_female_g is not None:
-                    
-                    # Initializes a matplotlib figure with specified size and resolution
-                    plt.figure(figsize=(20, 4), dpi=50)
-                    
-                    # Loops through 5 interpolation steps between glasses and no-glasses labels
-                    for i in range(5):
-                        
-                        # Creates a subplot in a 1x5 grid for each transition image
-                        ax = plt.subplot(1, 5, i + 1)
-                        
-                        # Computes a weighted blend of the no-glasses and glasses labels
-                        label = weights[i] * labels_ng[0] + (1 - weights[i]) * labels_g[0]
-                        
-                        # Concatenates the reshaped noise vector and interpolated label, then moves to device
-                        noise_and_labels = torch.cat(
-                            [self.z_female_g.reshape(1, self.z_dim, 1, 1),
-                            label.reshape(1, 2, 1, 1)], dim=1).to(self.device)
-                        
-                        # Generates a fake image from the interpolated input, moves to CPU, and detaches from graph
-                        fake = self.generator(noise_and_labels).cpu().detach()
-                        
-                        # Normalizes and rearranges image dimensions for display
-                        img = (fake[0] / 2 + 0.5).permute(1, 2, 0)
-                        
-                        # Displays the image using matplotlib
-                        plt.imshow(img.numpy())
-                        
-                        # Removes x-axis ticks for cleaner visualization
-                        plt.xticks([])
-                        
-                        # Removes y-axis ticks for cleaner visualization
-                        plt.yticks([])
-                    
-                    # Adjusts spacing between subplots to reduce whitespace
-                    plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                    
-                    # Renders the final transition image grid to the screen
-                    plt.show()
-                
-                # If the female image with glasses hasn't been selected, show a warning message
-                else:
-                    QMessageBox.warning(None, "Follow Periority", "First, Select Images With EyeGlasses!")
+            # If the sender is unrecognized, print an error and exit
+            case _:
+                print(f"Unknown sender: {sender}")
+                return
 
-            # Case 4: Transition male with glasses → without glasses
-            case "pushButton_TransitionMalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs":
-                # Checks if the male image with glasses has been previously generated
-                if self.z_male_g is not None:
-                    
-                    # Initializes a matplotlib figure with specified size and resolution
-                    plt.figure(figsize=(20, 4), dpi=50)
-                    
-                    # Loops through 5 interpolation steps between glasses and no-glasses labels
-                    for i in range(5):
-                        
-                        # Creates a subplot in a 1x5 grid for each transition image
-                        ax = plt.subplot(1, 5, i + 1)
-                        
-                        # Computes a weighted blend of the no-glasses and glasses labels
-                        label = weights[i] * labels_ng[0] + (1 - weights[i]) * labels_g[0]
-                        
-                        # Concatenates the reshaped noise vector and interpolated label, then moves to device
-                        noise_and_labels = torch.cat(
-                            [self.z_male_g.reshape(1, self.z_dim, 1, 1),
-                            label.reshape(1, 2, 1, 1)], dim=1).to(self.device)
-                        
-                        # Generates a fake image from the interpolated input, moves to CPU, and detaches from graph
-                        fake = self.generator(noise_and_labels).cpu().detach()
-                        
-                        # Normalizes and rearranges image dimensions for display
-                        img = (fake[0] / 2 + 0.5).permute(1, 2, 0)
-                        
-                        # Displays the image using matplotlib
-                        plt.imshow(img.numpy())
-                        
-                        # Removes x-axis ticks for cleaner visualization
-                        plt.xticks([])
-                        
-                        # Removes y-axis ticks for cleaner visualization
-                        plt.yticks([])
-                    
-                    # Adjusts spacing between subplots to reduce whitespace
-                    plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                    
-                    # Renders the final transition image grid to the screen
-                    plt.show()
-                
-                # If the male image with glasses hasn't been selected, show a warning message
-                else:
-                    QMessageBox.warning(None, "Follow Periority", "First, Select Images With EyeGlasses!")
+        # Concatenate the input images into a single batch tensor and move to device
+        input_tensor = torch.cat(input_batch, dim=0).to(self.device)
 
-            # Case 5: Transition male → female with glasses
-            case "pushButton_TransitionMaleToFemalesWithoutEyeGlasses_ConditionalGANs":
-                # Checks if both male and female noise vectors (without glasses) have been generated
-                if self.z_female_ng is not None and self.z_male_ng is not None:
-                    
-                    # Initializes a matplotlib figure with specified size and resolution
-                    plt.figure(figsize=(20, 4), dpi=50)
-                    
-                    # Loops through 5 interpolation steps between male and female latent vectors
-                    for i in range(5):
-                        
-                        # Creates a subplot in a 1x5 grid for each transition image
-                        ax = plt.subplot(1, 5, i + 1)
-                        
-                        # Interpolates between male and female noise vectors using the current weight
-                        z = weights[i] * self.z_female_ng + (1 - weights[i]) * self.z_male_ng
-                        
-                        # Concatenates the interpolated noise vector and the no-glasses label, then moves to device
-                        noise_and_labels = torch.cat(
-                            [z.reshape(1, self.z_dim, 1, 1),
-                            labels_ng[0].reshape(1, 2, 1, 1)], dim=1).to(self.device)
-                        
-                        # Generates a fake image from the interpolated input, moves to CPU, and detaches from graph
-                        fake = self.generator(noise_and_labels).cpu().detach()
-                        
-                        # Normalizes and rearranges image dimensions for display
-                        img = (fake[0] / 2 + 0.5).permute(1, 2, 0)
-                        
-                        # Displays the image using matplotlib
-                        plt.imshow(img.numpy())
-                        
-                        # Removes x-axis ticks for cleaner visualization
-                        plt.xticks([])
-                        
-                        # Removes y-axis ticks for cleaner visualization
-                        plt.yticks([])
-                    
-                    # Adjusts spacing between subplots to reduce whitespace
-                    plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                    
-                    # Renders the final transition image grid to the screen
-                    plt.show()
-                
-                # If either the male or female noise vector is missing, show a warning message
-                else:
-                    QMessageBox.warning(None, "Follow Periority", "First, Select Images Without EyeGlasses!")
+        # Set the generator to evaluation mode to disable dropout and batchnorm updates
+        generator.eval()
 
-            # Case 6: Transition male → female without glasses
-            case "pushButton_TransitionMaleToFemalesWithEyeGlasses_ConditionalGANs":
-                # Checks if both male and female noise vectors (without glasses) have been generated
-                if self.z_female_ng is not None and self.z_male_ng is not None:
-                    
-                    # Initializes a matplotlib figure with specified size and resolution
-                    plt.figure(figsize=(20, 4), dpi=50)
-                    
-                    # Loops through 5 interpolation steps between male and female latent vectors
-                    for i in range(5):
-                        
-                        # Creates a subplot in a 1x5 grid for each transition image
-                        ax = plt.subplot(1, 5, i + 1)
-                        
-                        # Interpolates between male and female noise vectors using the current weight
-                        z = weights[i] * self.z_female_ng + (1 - weights[i]) * self.z_male_ng
-                        
-                        # Concatenates the interpolated noise vector and the glasses label, then moves to device
-                        noise_and_labels = torch.cat(
-                            [z.reshape(1, self.z_dim, 1, 1),
-                            labels_g[0].reshape(1, 2, 1, 1)], dim=1).to(self.device)
-                        
-                        # Generates a fake image from the interpolated input, moves to CPU, and detaches from graph
-                        fake = self.generator(noise_and_labels).cpu().detach()
-                        
-                        # Normalizes and rearranges image dimensions for display
-                        img = (fake[0] / 2 + 0.5).permute(1, 2, 0)
-                        
-                        # Displays the image using matplotlib
-                        plt.imshow(img.numpy())
-                        
-                        # Removes x-axis ticks for cleaner visualization
-                        plt.xticks([])
-                        
-                        # Removes y-axis ticks for cleaner visualization
-                        plt.yticks([])
-                    
-                    # Adjusts spacing between subplots to reduce whitespace
-                    plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                    
-                    # Renders the final transition image grid to the screen
-                    plt.show()
-                
-                # If either the male or female noise vector is missing, show a warning message
-                else:
-                    QMessageBox.warning(None, "Follow Periority", "First, Select Images Without EyeGlasses!")
+        # Run inference without tracking gradients
+        with torch.no_grad():
+            # Generate output images from the input batch
+            output_batch = generator(input_tensor).cpu()
 
-            # Case 7: 2x2 grid of gender and glasses transitions
-            case "pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses_ConditionalGANs":
-                # Checks if both male and female noise vectors (with glasses) have been generated
-                if self.z_female_g is not None and self.z_male_g is not None:
-                    
-                    # Initializes a matplotlib figure with specified size and resolution
-                    plt.figure(figsize=(20, 5), dpi=50)
-                    
-                    # Loops through 4 combinations to fill the 2x2 grid
-                    for i in range(4):
-                        
-                        # Creates a subplot in a 1x4 grid for each image
-                        ax = plt.subplot(1, 4, i + 1)
-                        
-                        # Determines gender: 0 for male, 1 for female
-                        p = i // 2
-                        
-                        # Determines glasses status: 0 for glasses, 1 for no glasses
-                        q = i % 2
-                        
-                        # Selects the appropriate latent vector based on gender
-                        z = self.z_female_g * p + self.z_male_g * (1 - p)
-                        
-                        # Selects the appropriate label based on glasses status
-                        label = labels_ng[0] * q + labels_g[0] * (1 - q)
-                        
-                        # Concatenates the latent vector and label, then moves to device
-                        noise_and_labels = torch.cat(
-                            [z.reshape(1, self.z_dim, 1, 1),
-                            label.reshape(1, 2, 1, 1)], dim=1).to(self.device)
-                        
-                        # Generates a fake image from the input, moves to CPU, and detaches from graph
-                        fake = self.generator(noise_and_labels)
-                        
-                        # Normalizes and rearranges image dimensions for display
-                        img = (fake.cpu().detach()[0] / 2 + 0.5).permute(1, 2, 0)
-                        
-                        # Displays the image using matplotlib
-                        plt.imshow(img.numpy())
-                        
-                        # Removes x-axis ticks for cleaner visualization
-                        plt.xticks([])
-                        
-                        # Removes y-axis ticks for cleaner visualization
-                        plt.yticks([])
-                    
-                    # Adjusts spacing between subplots to reduce whitespace
-                    plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                    
-                    # Renders the final image grid to the screen
-                    plt.show()
-                
-                # If either the male or female noise vector is missing, show a warning message
-                else:
-                    QMessageBox.warning(None, "Follow Periority", "First, Select Images With EyeGlasses!")
+        # Create a 2×4 grid for displaying the generated images
+        fig, axes = plt.subplots(2, 4, figsize=(8, 4), dpi=100)
 
-            # Case 8: 6x6 grid of interpolated gender and glasses transitions
-            case "pushButton_TransitionMaleToFemalesWithEyeGlassesToWithoutEyeGlasses2_ConditionalGANs":
-                # Checks if both male and female noise vectors (without glasses) have been generated
-                if self.z_female_ng is not None and self.z_male_ng is not None:
-                    
-                    # Initializes a matplotlib figure with specified size and resolution
-                    plt.figure(figsize=(20, 20), dpi=50)
-                    
-                    # Loops through 36 combinations to fill the 6x6 grid
-                    for i in range(36):
-                        
-                        # Creates a subplot in a 6x6 grid for each image
-                        ax = plt.subplot(6, 6, i + 1)
-                        
-                        # Determines the row index (controls gender interpolation)
-                        p = i // 6
-                        
-                        # Determines the column index (controls glasses interpolation)
-                        q = i % 6
-                        
-                        # Interpolates between male and female noise vectors using row index
-                        z = self.z_female_ng * p / 5 + self.z_male_ng * (1 - p / 5)
-                        
-                        # Interpolates between no-glasses and glasses labels using column index
-                        label = labels_ng[0] * q / 5 + labels_g[0] * (1 - q / 5)
-                        
-                        # Concatenates the interpolated noise vector and label, then moves to device
-                        noise_and_labels = torch.cat(
-                            [z.reshape(1, self.z_dim, 1, 1),
-                            label.reshape(1, 2, 1, 1)], dim=1).to(self.device)
-                        
-                        # Generates a fake image from the input
-                        fake = self.generator(noise_and_labels)
-                        
-                        # Normalizes and rearranges image dimensions for display
-                        img = (fake.cpu().detach()[0] / 2 + 0.5).permute(1, 2, 0)
-                        
-                        # Displays the image using matplotlib
-                        plt.imshow(img.numpy())
-                        
-                        # Removes x-axis ticks for cleaner visualization
-                        plt.xticks([])
-                        
-                        # Removes y-axis ticks for cleaner visualization
-                        plt.yticks([])
-                    
-                    # Adjusts spacing between subplots to reduce whitespace
-                    plt.subplots_adjust(wspace=-0.08, hspace=-0.01)
-                    
-                    # Renders the final image grid to the screen
-                    plt.show()
-                
-                # If either the male or female noise vector is missing, show a warning message
-                else:
-                    QMessageBox.warning(None, "Follow Periority", "First, Select Images Without EyeGlasses!")
+        # Set the window title for the plot
+        fig.canvas.manager.set_window_title("Generated Images")
 
-# Define the Critic (Discriminator) class for the Conditional GAN
-class Critic(nn.Module):
-    # Constructor to initialize the Critic model
-    def __init__(self, img_channels, features):
-        # img_channels: number of input image channels (e.g., 3 for RGB)
-        # features: base number of feature maps used in convolutional layers
+        # Loop through each subplot and display the corresponding image
+        for ax, img in zip(axes.flatten(), output_batch):
+            # Denormalize image from [-1, 1] to [0, 1] for visualization
+            img = (img + 1) / 2
 
-        # Call the parent class constructor
-        super().__init__()
+            # Rearrange tensor dimensions from [C, H, W] to [H, W, C] and clamp values
+            img = img.permute(1, 2, 0).clamp(0, 1)
 
-        # Define the sequential model architecture
-        self.net = nn.Sequential(
-            # First convolutional layer: downsample input image
-            nn.Conv2d(img_channels, features, kernel_size=4, stride=2, padding=1),
+            # Display the image in the subplot
+            ax.imshow(img.numpy())
 
-            # Apply LeakyReLU activation for non-linearity
-            nn.LeakyReLU(0.2),
+            # Hide axis ticks for a cleaner look
+            ax.axis("off")
 
-            # Downsampling block 1: features → features * 2
-            self.block(features, features * 2, 4, 2, 1),
+        # Adjust spacing between subplots
+        plt.subplots_adjust(wspace=0.05, hspace=0.05)
 
-            # Downsampling block 2: features * 2 → features * 4
-            self.block(features * 2, features * 4, 4, 2, 1),
+        # Optimize layout to prevent overlap
+        plt.tight_layout()
 
-            # Downsampling block 3: features * 4 → features * 8
-            self.block(features * 4, features * 8, 4, 2, 1),
+        # Show the final plot window with generated images
+        plt.show()
 
-            # Downsampling block 4: features * 8 → features * 16
-            self.block(features * 8, features * 16, 4, 2, 1),
-
-            # Downsampling block 5: features * 16 → features * 32
-            self.block(features * 16, features * 32, 4, 2, 1),
-
-            # Final convolution: reduce to single output score
-            nn.Conv2d(features * 32, 1, kernel_size=4, stride=2, padding=0)
+    # Method to inform the user how to adapt the CycleGAN pipeline for eyeglasses-based image translation
+    def Implementing_Last_cGAN_for_EyeGlasses_by_CycleGAN(self):
+        # Display an informational message box explaining how to prepare the dataset for eyeglasses training
+        QMessageBox.information(
+            None,  # No parent widget specified
+            "Attention:",  # Title of the message box
+            "Creating models and training them is the same as described on this page.\n\n"
+            "However, when preparing the dataset before training, make sure to point to the eyeglasses images as shown below:\n\n"
+            "dataset = LoadData(\n"
+            "    root_A = ['kagglehub/glasses/G/'],\n"
+            "    root_B = ['kagglehub/glasses/NoG/'],\n"
+            "    transform = transforms\n"
+            ")\n"
+            "loader = DataLoader(\n"
+            "    dataset,\n"
+            "    batch_size = 1,\n"
+            "    shuffle = True,\n"
+            "    pin_memory = True\n"
+            ")"
         )
-
-    # Helper method to define a convolutional block with normalization and activation
-    def block(self, in_channels, out_channels, kernel_size, stride, padding):
-        # in_channels: number of input channels
-        # out_channels: number of output channels
-        # kernel_size, stride, padding: convolution parameters
-
-        return nn.Sequential(
-            # Convolutional layer without bias
-            nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=False),
-
-            # Instance normalization to stabilize training
-            nn.InstanceNorm2d(out_channels, affine=True),
-
-            # LeakyReLU activation for non-linearity
-            nn.LeakyReLU(0.2)
-        )
-
-    # Forward pass through the Critic network
-    def forward(self, x):
-        return self.net(x)
-
-# Define the Generator class for the Conditional GAN
-class Generator(nn.Module):
-    # Constructor to initialize the Generator model
-    def __init__(self, noise_channels, img_channels, features):
-        # noise_channels: number of input channels (latent vector + label channels)
-        # img_channels: number of output image channels (e.g., 3 for RGB)
-        # features: base number of feature maps used in transposed convolutions
-
-        # Call the parent class constructor
-        super(Generator, self).__init__()
-
-        # Define the sequential model architecture
-        self.net = nn.Sequential(
-            # First upsampling block: noise → features * 64
-            self.block(noise_channels, features * 64, 4, 1, 0),
-
-            # Upsampling block 1: features * 64 → features * 32
-            self.block(features * 64, features * 32, 4, 2, 1),
-
-            # Upsampling block 2: features * 32 → features * 16
-            self.block(features * 32, features * 16, 4, 2, 1),
-
-            # Upsampling block 3: features * 16 → features * 8
-            self.block(features * 16, features * 8, 4, 2, 1),
-
-            # Upsampling block 4: features * 8 → features * 4
-            self.block(features * 8, features * 4, 4, 2, 1),
-
-            # Upsampling block 5: features * 4 → features * 2
-            self.block(features * 4, features * 2, 4, 2, 1),
-
-            # Final transposed convolution: features * 2 → image channels
-            nn.ConvTranspose2d(features * 2, img_channels, kernel_size=4, stride=2, padding=1),
-
-            # Tanh activation to scale output pixels to [-1, 1]
-            nn.Tanh()
-        )
-
-    # Helper method to define an upsampling block with normalization and activation
-    def block(self, in_channels, out_channels, kernel_size, stride, padding):
-        # in_channels: number of input channels
-        # out_channels: number of output channels
-        # kernel_size, stride, padding: transposed convolution parameters
-
-        return nn.Sequential(
-            # Transposed convolutional layer without bias
-            nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=False),
-
-            # Batch normalization to stabilize training
-            nn.BatchNorm2d(out_channels),
-
-            # ReLU activation for non-linearity
-            nn.ReLU()
-        )
-
-    # Forward pass through the Generator network
-    def forward(self, x):
-        return self.net(x)
 
 # Class to visualize GAN training progress using matplotlib plots inside a PyQt scrollable window
 class PlotWindow(QMainWindow):
 
     # Constructor to initialize the plot window and its components
-    def __init__(self, device=None, model_Generator=None, z_dim=None):
-        # device: computation device (CPU or GPU)
-        # model_Generator: trained generator model used to produce images
-        # z_dim: dimensionality of the latent noise vector
-
-        # Call the base QMainWindow constructor
+    def __init__(self):
+        # Initialize the base QMainWindow class
         super().__init__()
 
         # Set the title of the main window
         self.setWindowTitle("Training Progress")
 
-        # Set the initial size of the window
+        # Set the initial dimensions of the window
         self.resize(800, 700)
 
         # Create a scrollable area to hold multiple plot canvases
         self.scroll = QScrollArea()
 
-        # Create a container widget to hold the layout and plots
+        # Create a container widget that will hold the layout and plots
         self.container = QWidget()
 
         # Create a vertical layout to stack plots vertically inside the container
         self.layout = QVBoxLayout(self.container)
 
-        # Set the container widget as the content of the scroll area
+        # Assign the container widget to the scroll area
         self.scroll.setWidget(self.container)
 
         # Enable dynamic resizing of the scroll area’s contents
@@ -1010,307 +674,580 @@ class PlotWindow(QMainWindow):
         # Set the scroll area as the central widget of the main window
         self.setCentralWidget(self.scroll)
 
-        # Store reference to the generator model for generating images
-        self.generator = model_Generator
+    # Helper method to convert a PyTorch tensor to a NumPy image array
+    def plot_tensor(self, tensor):
+        """Convert a tensor to a NumPy image array."""
+        # Detach the tensor from the computation graph and move it to CPU
+        img = tensor.detach().cpu().numpy()
 
-        # Store the device (CPU or GPU) used for computation
-        self.device = device
+        # Rearrange dimensions from [C, H, W] to [H, W, C] for visualization
+        img = img.transpose(1, 2, 0)
 
-        # Store the dimensionality of the latent noise vector
-        self.z_dim = z_dim
+        # Rescale pixel values from [-1, 1] to [0, 1] for display
+        img = (img + 1) / 2
 
-    # Method to generate and display images after each training epoch
-    def plot_epoch(self, epoch):
-        # epoch: current training epoch number
+        # Clip values to ensure they stay within [0, 1] range
+        return img.clip(0, 1)
 
-        # Internal function to generate and plot images for a specific label
-        def generate_and_plot(label_index, title_suffix):
-            # label_index: index of the label (0 for glasses, 1 for no glasses)
-            # title_suffix: text to append to the plot title
+    # Method to plot a batch of real and generated images during training
+    def plot(self, i, A, B, fake_A, fake_B):
+        # Convert the first image in each batch tensor to NumPy format
+        real_A_img = self.plot_tensor(A[0])       # Real image from domain A
+        real_B_img = self.plot_tensor(B[0])       # Real image from domain B
+        fake_A_img = self.plot_tensor(fake_A[0])  # Fake image generated from domain B
+        fake_B_img = self.plot_tensor(fake_B[0])  # Fake image generated from domain A
 
-            # Generate random noise vectors for 32 samples
-            noise = torch.randn(32, self.z_dim, 1, 1)
+        # Create a matplotlib figure with 1 row and 4 columns
+        fig, axes = plt.subplots(1, 4, figsize=(16, 4))
 
-            # Create label tensor with shape [32, 2, 1, 1]
-            labels = torch.zeros(32, 2, 1, 1)
+        # Define titles for each subplot
+        titles = ["Real A", "Fake B from A", "Real B", "Fake A from B"]
 
-            # Set the specified label index to 1 for all samples
-            labels[:, label_index, :, :] = 1
+        # Group the images to be displayed
+        images = [real_A_img, fake_B_img, real_B_img, fake_A_img]
 
-            # Concatenate noise and labels to form the input to the generator
-            noise_and_labels = torch.cat([noise, labels], dim=1).to(self.device)
+        # Loop through each subplot and display the corresponding image
+        for ax, img, title in zip(axes, images, titles):
+            ax.imshow(img)         # Display the image
+            ax.set_title(title)    # Set the title for the subplot
+            ax.axis("off")         # Hide axis ticks for cleaner display
 
-            # Generate fake images using the generator
-            fake = self.generator(noise_and_labels).cpu().detach()
+        # Add a title to the entire figure indicating the batch number
+        fig.suptitle(f"Batch {i+1}", fontsize=14)
 
-            # Create a matplotlib figure to hold the image grid
-            fig = Figure(figsize=(20, 10), dpi=72)
+        # Adjust layout to prevent overlap
+        fig.tight_layout()
 
-            # Create a canvas to render the figure inside the PyQt window
-            canvas = FigureCanvas(fig)
+        # Embed the matplotlib figure into the PyQt layout using a canvas
+        canvas = FigureCanvas(fig)
+        self.layout.addWidget(canvas)
 
-            # Set a minimum height for the canvas to ensure visibility
-            canvas.setMinimumHeight(600)
+        # Automatically scroll to the bottom of the scroll area to show the latest plot
+        self.scroll.verticalScrollBar().setValue(self.scroll.verticalScrollBar().maximum())
 
-            # Loop through each generated image and add it to the figure
-            for i in range(32):
-                # Create a subplot for each image
-                ax = fig.add_subplot(4, 8, i + 1)
-
-                # Normalize image pixels to [0, 1] and rearrange dimensions
-                image = (fake[i] / 2 + 0.5).permute(1, 2, 0)
-
-                # Display the image in the subplot
-                ax.imshow(image)
-
-                # Remove axis ticks for cleaner display
-                ax.set_xticks([])
-                ax.set_yticks([])
-
-            # Add a title to the figure indicating the epoch and label type
-            fig.suptitle(f"Generated Images after Epoch {epoch} ({title_suffix})", fontsize=16)
-
-            # Adjust spacing between subplots
-            fig.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.05, wspace=0.2, hspace=0.3)
-
-            # Add the canvas to the layout so it appears in the scrollable window
-            self.layout.addWidget(canvas)
-
-            # Scroll to the bottom to show the latest plot
-            self.scroll.verticalScrollBar().setValue(self.scroll.verticalScrollBar().maximum())
-
-        # Generate and plot images with glasses
-        generate_and_plot(label_index=0, title_suffix="With Glasses")
-
-        # Generate and plot images without glasses
-        generate_and_plot(label_index=1, title_suffix="Without Glasses")
-
-# Class to handle Conditional GAN training in a separate thread using PyQt
-class TrainingConditionalGANsThread(QThread):
-    # Define a PyQt signal to send log messages to the UI
+# Class to handle CycleGAN training in a separate thread using PyQt for UI responsiveness
+class TrainingCycleGANsThread(QThread):
+    # Signal to emit log messages to the UI
     log_signal = pyqtSignal(str)
 
-    # Define a PyQt signal to trigger image display updates in the UI
-    display_signal = pyqtSignal(int)
+    # Signal to emit image batches for visualization (index, real A, real B, fake A, fake B)
+    display_signal = pyqtSignal(int, object, object, object, object)
 
-    # Constructor method to initialize training configuration and models
-    def __init__(self, plot_window, DownloadLogPopup, batch_size, device, criticModel, generatorModel, data_loader, z_dim):
-        # Call the base class constructor to initialize QThread
+    # Constructor to initialize training thread with models, data, and UI hooks
+    def __init__(self, plot_window, DownloadLogPopup, gen_A, gen_B, disc_A, disc_B, loader, device):
         super().__init__()
 
-        # Reference to the plotting window for visualizing generated images
+        # UI components for plotting and logging
         self.plot_window = plot_window
-
-        # Reference to the log popup window for displaying training logs
         self.DownloadLogPopup = DownloadLogPopup
 
-        # Set the batch size used during training iterations
-        self.batch_size = batch_size
-
-        # Set the device (CPU or GPU) for model computation
+        # Device to run training on (CPU or GPU)
         self.device = device
 
-        # Override the learning rate with a fixed value
-        self.lr = 0.0001
+        # Loss functions: L1 for cycle consistency, MSE for adversarial loss
+        self.l1 = nn.L1Loss()
+        self.mse = nn.MSELoss()
 
-        # Store the dimensionality of the latent noise vector
-        self.z_dim = z_dim
+        # Initialize gradient scalers for mixed precision training if using CUDA
+        if device.type == "cuda":
+            self.g_scaler = torch.cuda.amp.GradScaler()
+            self.d_scaler = torch.cuda.amp.GradScaler()
+        else:
+            self.g_scaler = None
+            self.d_scaler = None
 
-        # Store the discriminator model used to classify real vs fake images
-        self.critic = criticModel
+        # Learning rate for both optimizers
+        self.lr = 0.00001
 
-        # Store the generator model used to synthesize fake images
-        self.generator = generatorModel
+        # Optimizer for both discriminators
+        self.opt_disc = torch.optim.Adam(
+            list(disc_A.parameters()) + list(disc_B.parameters()),
+            lr=self.lr,
+            betas=(0.5, 0.999)
+        )
 
-        # Define optimizer for the generator using Adam
-        self.opt_gen = torch.optim.Adam(self.generator.parameters(), lr=self.lr, betas=(0.0, 0.9))
+        # Optimizer for both generators
+        self.opt_gen = torch.optim.Adam(
+            list(gen_A.parameters()) + list(gen_B.parameters()),
+            lr=self.lr,
+            betas=(0.5, 0.999)
+        )
 
-        # Define optimizer for the critic using Adam
-        self.opt_critic = torch.optim.Adam(self.critic.parameters(), lr=self.lr, betas=(0.0, 0.9))
+        # Store model references
+        self.disc_A = disc_A
+        self.disc_B = disc_B
+        self.gen_A = gen_A
+        self.gen_B = gen_B
 
-        # Initialize early stopping mechanism to halt training if no improvement
+        # Early stopping utility (not used in this snippet but initialized)
         self.stopper = EarlyStop(patience=1000, min_delta=0.01)
 
-        # Store the data loader that provides batches of training images
-        self.data_loader = data_loader
+        # DataLoader for training data
+        self.loader = loader
 
-        # Generate fixed noise input for generator evaluation and move to device
-        self.noise = torch.randn((self.batch_size, 2)).to(device)
-
-        # Flag to indicate whether a manual stop has been requested
+        # Flag to allow stopping training manually
         self._stop_requested = False
 
-    # Method to compute gradient penalty for WGAN-GP
-    def GP(self, critic, real, fake):
-        # Get batch size and image dimensions
-        B, C, H, W = real.shape
+    # Method to train one epoch of CycleGAN
+    def train_epoch(self, disc_A, disc_B, gen_A, gen_B, loader, opt_disc, opt_gen,
+                    l1, mse, d_scaler, g_scaler, device, log_signal):
 
-        # Generate random interpolation weights
-        alpha = torch.rand((B, 1, 1, 1)).repeat(1, C, H, W).to(self.device)
+        # Create a progress bar for the training loop
+        loop = tqdm(loader, leave=True)
 
-        # Create interpolated images between real and fake
-        interpolated_images = real * alpha + fake * (1 - alpha)
+        for i, (A, B) in enumerate(loop):
+            # Stop training if requested
+            if self._stop_requested:
+                self.log_signal.emit("Training stopped by user.")
+                break
 
-        # Get critic scores for interpolated images
-        critic_scores = critic(interpolated_images)
+            # Log the start of the current batch
+            log_signal.emit(f"Batch {i+1} started.")
 
-        # Use PyTorch's autograd to compute gradients
-        # This is often used in GANs (e.g., WGAN-GP) to calculate gradient penalties
-        # Compute gradients of critic scores with respect to interpolated images
-        gradient = torch.autograd.grad(
+            # Move real images from both domains to the training device
+            A = A.to(device)
+            B = B.to(device)
 
-            # Specify the input tensor for which gradients are computed
-            inputs=interpolated_images,
+            # Use mixed precision context if on CUDA
+            context = torch.cuda.amp.autocast() if device.type == "cuda" else nullcontext()
+            with context:
+                # Generate fake images
+                fake_A = gen_A(B)
+                fake_B = gen_B(A)
 
-            # Specify the output tensor whose gradients are needed
-            outputs=critic_scores,
+                # Discriminator A loss
+                D_A_real = disc_A(A)
+                D_A_fake = disc_A(fake_A.detach())
+                D_A_real_loss = mse(D_A_real, torch.ones_like(D_A_real))
+                D_A_fake_loss = mse(D_A_fake, torch.zeros_like(D_A_fake))
+                D_A_loss = D_A_real_loss + D_A_fake_loss
 
-            # Provide gradient of outputs w.r.t. themselves (∂output/∂output = 1)
-            grad_outputs=torch.ones_like(critic_scores),
+                # Discriminator B loss
+                D_B_real = disc_B(B)
+                D_B_fake = disc_B(fake_B.detach())
+                D_B_real_loss = mse(D_B_real, torch.ones_like(D_B_real))
+                D_B_fake_loss = mse(D_B_fake, torch.zeros_like(D_B_fake))
+                D_B_loss = D_B_real_loss + D_B_fake_loss
 
-            # Retain computation graph for higher-order gradients
-            create_graph=True,
+                # Total discriminator loss
+                D_loss = (D_A_loss + D_B_loss) / 2
 
-            # Retain graph for possible reuse in further backward passes
-            retain_graph=True
-        )[0]  # Extract the first element from the returned tuple (the actual gradient tensor)
+            # Backpropagation for discriminators
+            opt_disc.zero_grad()
+            if d_scaler:
+                d_scaler.scale(D_loss).backward()
+                d_scaler.step(opt_disc)
+                d_scaler.update()
+            else:
+                D_loss.backward()
+                opt_disc.step()
 
-        # Flatten gradients for norm computation
-        gradient = gradient.view(gradient.shape[0], -1)
+            # Generator training
+            with context:
+                # Re-evaluate fake images for generator loss
+                D_A_fake = disc_A(fake_A)
+                D_B_fake = disc_B(fake_B)
 
-        # Compute L2 norm of gradients
-        gradient_norm = gradient.norm(2, dim=1)
+                # Adversarial loss for generators
+                loss_G_A = mse(D_A_fake, torch.ones_like(D_A_fake))
+                loss_G_B = mse(D_B_fake, torch.ones_like(D_B_fake))
 
-        # Compute gradient penalty term
-        gp = torch.mean((gradient_norm - 1) ** 2)
+                # Cycle consistency loss
+                cycle_B = gen_B(fake_A)
+                cycle_A = gen_A(fake_B)
+                cycle_B_loss = l1(B, cycle_B)
+                cycle_A_loss = l1(A, cycle_A)
 
-        # Return gradient penalty
-        return gp
+                # Total generator loss
+                G_loss = loss_G_A + loss_G_B + cycle_A_loss * 10 + cycle_B_loss * 10
 
-    # Method to train the GAN on a single batch
-    def train_batch(self, onehots, img_and_labels, epoch):
-        # Move real images to device
-        real = img_and_labels.to(self.device)
+            # Backpropagation for generators
+            opt_gen.zero_grad()
+            if g_scaler:
+                g_scaler.scale(G_loss).backward()
+                g_scaler.step(opt_gen)
+                g_scaler.update()
+            else:
+                G_loss.backward()
+                opt_gen.step()
 
-        # Get batch size
-        B = real.shape[0]
+            # Emit log message with current loss values
+            log_signal.emit(f"Batch {i+1}, D_loss: {D_loss.item():.4f}, G_loss: {G_loss.item():.4f}")
 
-        # Train the critic multiple times per batch
-        for _ in range(5):
-            # Generate random noise
-            noise = torch.randn(B, self.z_dim, 1, 1)
+            # Scroll log output to the bottom
+            self.DownloadLogPopup.log_output.moveCursor(QTextCursor.MoveOperation.End)
+            self.DownloadLogPopup.log_output.ensureCursorVisible()
+            QApplication.processEvents()
 
-            # Reshape one-hot labels to match input format
-            onehots = onehots.reshape(B, 2, 1, 1)
+            # Emit images for visualization every 10 batches
+            if i % 10 == 0:
+                self.display_signal.emit(i, A, B, fake_A, fake_B)
 
-            # Concatenate noise and labels
-            noise_and_labels = torch.cat([noise, onehots], dim=1).to(self.device)
+            # Update progress bar with current loss values
+            loop.set_postfix(D_loss=D_loss.item(), G_loss=G_loss.item())
 
-            # Generate fake images from generator
-            fake_img = self.generator(noise_and_labels).to(self.device)
-
-            # Extract label tensors from real data
-            fakelabels = img_and_labels[:, 3:, :, :].to(self.device)
-
-            # Concatenate fake images with their labels
-            fake = torch.cat([fake_img, fakelabels], dim=1).to(self.device)
-
-            # Get critic scores for real and fake images
-            critic_real = self.critic(real).reshape(-1)
-            critic_fake = self.critic(fake).reshape(-1)
-
-            # Compute gradient penalty
-            gp = self.GP(self.critic, real, fake)
-
-            # Compute critic loss using WGAN-GP formula
-            loss_critic = -(torch.mean(critic_real) - torch.mean(critic_fake)) + 10 * gp
-
-            # Backpropagate and update critic
-            self.opt_critic.zero_grad()
-            loss_critic.backward(retain_graph=True)
-            self.opt_critic.step()
-
-        # Train the generator once per batch
-        gen_fake = self.critic(fake).reshape(-1)
-        loss_gen = -torch.mean(gen_fake)
-
-        # Backpropagate and update generator
-        self.opt_gen.zero_grad()
-        loss_gen.backward()
-        self.opt_gen.step()
-
-        # Return losses for logging
-        return loss_critic, loss_gen
-
-    # Method to manually stop the training process
+    # Method to request stopping the training loop
     def stop(self):
-        # Set the stop flag to True
         self._stop_requested = True
-
-        # Disable the cancel button in the UI to prevent further interaction
         self.DownloadLogPopup.cancel_button.setEnabled(False)
 
-    # Main method that runs the training loop in a separate thread
+    # Main method executed when the thread starts
     def run(self):
         try:
-            # Emit signal to indicate training has started
+            # Emit initial log messages
             self.log_signal.emit("Training thread started.")
+            self.log_signal.emit(f"Train loader has {len(self.loader)} batches.")
 
-            # Emit signal with number of batches in the training loader
-            self.log_signal.emit(f"Train loader has {len(self.data_loader)} batches.")
+            # Start training for one epoch
+            self.train_epoch(
+                self.disc_A, self.disc_B, self.gen_A, self.gen_B,
+                self.loader, self.opt_disc, self.opt_gen,
+                self.l1, self.mse, self.d_scaler, self.g_scaler,
+                self.device, self.log_signal
+            )
 
-            # Loop through training epochs
-            for epoch in range(1, 101):
-                # Check if stop was requested
-                if self._stop_requested:
-                    # Exit the epoch loop
-                    break
+            # Save trained generator models to disk
+            torch.save(self.gen_A.state_dict(), "resources/models/gen_black_.pth")
+            torch.save(self.gen_B.state_dict(), "resources/models/gen_blond_.pth")
 
-                # Emit signal indicating current epoch
-                self.log_signal.emit(f"Epoch {epoch} started.")
-
-                # Initialize accumulators for generator and discriminator loss
-                gloss = 0
-                dloss = 0
-
-                # Loop through each batch in the training data
-                for batch_idx, (_, _, onehots, img_and_labels) in enumerate(self.data_loader):
-                    # Check for manual stop request
-                    if self._stop_requested:
-                        self.log_signal.emit("Training stopped by user.")
-                        break
-
-                    # Log progress every 10 batches
-                    if (batch_idx + 1) % 10 == 0:
-                        self.log_signal.emit(f"Processing batch {batch_idx + 1}/{len(self.data_loader)}")
-
-                    # Train on current batch and accumulate losses
-                    loss_critic, loss_gen = self.train_batch(onehots, img_and_labels, epoch)
-                    dloss += loss_critic.detach() / len(self.data_loader)
-                    gloss += loss_gen.detach() / len(self.data_loader)
-
-                # Emit display signal every 2 epochs to update visuals
-                if epoch % 2 == 0:
-                    self.display_signal.emit(epoch)
-
-                # Emit loss summary for the current epoch
-                self.log_signal.emit(f"At epoch {epoch}, Critic(Discriminator) Model loss: {dloss}, Generator Model loss: {gloss}")
-
-                # Scroll log output to the bottom in the UI
-                self.DownloadLogPopup.log_output.moveCursor(QTextCursor.MoveOperation.End)
-
-                # Ensure the cursor is visible in the log output
-                self.DownloadLogPopup.log_output.ensureCursorVisible()
-
-                # Process UI events to keep the interface responsive
-                QApplication.processEvents()
-
-            # Save the trained generator model to disk
-            torch.save(self.generator.state_dict(), 'resources/models/conditional_gan.pth')
-
-            # Emit signal indicating training has completed
+            # Emit completion message
             self.log_signal.emit("Training Finished.")
+            self.DownloadLogPopup.log_output.moveCursor(QTextCursor.MoveOperation.End)
+            self.DownloadLogPopup.log_output.ensureCursorVisible()
+            QApplication.processEvents()
 
-        # Catch and log any exceptions that occur during training
         except Exception as e:
+            # Emit error message if training fails
             self.log_signal.emit(f"Error during training: {str(e)}")
+
+# A modular convolutional block used in CycleGAN architecture
+# Supports both downsampling and upsampling with optional activation
+class ConvBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, down=True, use_act=True, **kwargs):
+        # Initialize the base nn.Module
+        super().__init__()
+
+        # Define the convolutional block using nn.Sequential
+        # If downsampling is requested, use a standard Conv2d layer
+        # Otherwise, use ConvTranspose2d for upsampling
+        self.conv = nn.Sequential(
+            nn.Conv2d(
+                in_channels,               # Number of input channels
+                out_channels,              # Number of output channels
+                padding_mode="reflect",    # Use reflect padding to reduce edge artifacts
+                **kwargs                   # Additional arguments like kernel_size, stride, padding
+            ) if down else nn.ConvTranspose2d(
+                in_channels,               # Number of input channels
+                out_channels,              # Number of output channels
+                **kwargs                   # Additional arguments for transposed convolution
+            ),
+
+            # Apply instance normalization to stabilize training and reduce style variance
+            nn.InstanceNorm2d(out_channels),
+
+            # Apply ReLU activation if use_act is True; otherwise, use identity (no activation)
+            nn.ReLU(inplace=True) if use_act else nn.Identity()
+        )
+
+    # Forward pass through the convolutional block
+    def forward(self, x):
+        # Pass input tensor through the sequential layers
+        return self.conv(x)
+
+# Residual block used in the generator network of CycleGAN
+# Helps preserve input features while enabling deeper learning
+class ResidualBlock(nn.Module):
+    def __init__(self, channels):
+        # Initialize the base nn.Module
+        super().__init__()
+
+        # Define the residual block as a sequence of two convolutional blocks
+        self.block = nn.Sequential(
+            # First ConvBlock with activation (ReLU by default)
+            ConvBlock(
+                channels,        # Number of input and output channels (same for residual)
+                channels,        # Keeps spatial dimensions unchanged
+                kernel_size=3,   # Standard kernel size for feature extraction
+                padding=1        # Padding to preserve input size
+            ),
+
+            # Second ConvBlock without activation (identity)
+            ConvBlock(
+                channels,        # Same number of channels
+                channels,        # Output matches input for residual addition
+                use_act=False,   # Skip activation to preserve linearity in residual path
+                kernel_size=3,   # Same kernel size
+                padding=1        # Same padding to maintain dimensions
+            )
+        )
+
+    # Forward pass through the residual block
+    def forward(self, x):
+        # Add the input tensor to the output of the block (residual connection)
+        return x + self.block(x)
+
+# Generator network for CycleGAN
+# Translates images from one domain to another using an encoder-residual-decoder architecture
+class Generator(nn.Module):
+    def __init__(self, img_channels, num_features=64, num_residuals=9):
+        # Initialize the base nn.Module
+        super().__init__()
+
+        # Initial convolutional layer:
+        # Uses a 7x7 kernel with reflection padding to reduce edge artifacts
+        self.initial = nn.Sequential(
+            nn.Conv2d(
+                img_channels,         # Number of input channels (e.g., 3 for RGB)
+                num_features,         # Number of output feature maps
+                kernel_size=7,        # Large receptive field to capture global structure
+                stride=1,             # Preserve spatial resolution
+                padding=3,            # Padding to maintain input size
+                padding_mode="reflect"  # Reflection padding to avoid border artifacts
+            ),
+            nn.InstanceNorm2d(num_features),  # Normalize across each instance
+            nn.ReLU(inplace=True)             # Non-linear activation
+        )
+
+        # Downsampling blocks:
+        # Reduce spatial dimensions while increasing feature depth
+        self.down_blocks = nn.ModuleList([
+            ConvBlock(
+                num_features,             # Input channels
+                num_features * 2,         # Double the channels
+                kernel_size=3,
+                stride=2,                 # Downsample by factor of 2
+                padding=1
+            ),
+            ConvBlock(
+                num_features * 2,         # Input from previous block
+                num_features * 4,         # Double again
+                kernel_size=3,
+                stride=2,
+                padding=1
+            )
+        ])
+
+        # Residual blocks:
+        # Preserve spatial dimensions and allow deeper feature learning
+        self.res_blocks = nn.Sequential(
+            *[ResidualBlock(num_features * 4)  # Keep channel depth constant
+              for _ in range(num_residuals)]   # Stack multiple residual blocks
+        )
+
+        # Upsampling blocks:
+        # Restore spatial dimensions while reducing feature depth
+        self.up_blocks = nn.ModuleList([
+            ConvBlock(
+                num_features * 4,         # Input channels
+                num_features * 2,         # Halve the channels
+                down=False,               # Use ConvTranspose2d for upsampling
+                kernel_size=3,
+                stride=2,
+                padding=1,
+                output_padding=1          # Ensure correct output size
+            ),
+            ConvBlock(
+                num_features * 2,
+                num_features * 1,
+                down=False,
+                kernel_size=3,
+                stride=2,
+                padding=1,
+                output_padding=1
+            )
+        ])
+
+        # Final output layer:
+        # Maps features back to image space with same number of channels as input
+        self.last = nn.Conv2d(
+            num_features * 1,       # Input channels
+            img_channels,           # Output channels (e.g., 3 for RGB)
+            kernel_size=7,          # Large kernel for smooth output
+            stride=1,
+            padding=3,
+            padding_mode="reflect"  # Maintain spatial size and reduce artifacts
+        )
+
+    # Forward pass through the generator
+    def forward(self, x):
+        # Initial convolution
+        x = self.initial(x)
+
+        # Downsampling layers
+        for layer in self.down_blocks:
+            x = layer(x)
+
+        # Residual transformation
+        x = self.res_blocks(x)
+
+        # Upsampling layers
+        for layer in self.up_blocks:
+            x = layer(x)
+
+        # Final output with tanh activation to scale output to [-1, 1]
+        return torch.tanh(self.last(x))
+
+# A basic convolutional block used in the discriminator network of CycleGAN
+# Performs downsampling with normalization and activation
+class Block(nn.Module):
+    def __init__(self, in_channels, out_channels, stride):
+        # Initialize the base nn.Module
+        super().__init__()
+
+        # Define the convolutional block using nn.Sequential
+        self.conv = nn.Sequential(
+            # Convolutional layer:
+            # Uses a 4x4 kernel, specified stride, and padding of 1
+            # Reflection padding helps reduce edge artifacts
+            nn.Conv2d(
+                in_channels,         # Number of input channels
+                out_channels,        # Number of output channels
+                kernel_size=4,       # Kernel size for spatial reduction
+                stride=stride,       # Controls downsampling rate
+                padding=1,           # Padding to maintain spatial alignment
+                padding_mode="reflect"  # Use reflection padding for smoother borders
+            ),
+
+            # Instance normalization to stabilize training and reduce style variance
+            nn.InstanceNorm2d(out_channels),
+
+            # LeakyReLU activation to allow small gradients for negative values
+            nn.LeakyReLU(0.2, inplace=True)  # Slope of 0.2 for negative inputs
+        )
+
+    # Forward pass through the block
+    def forward(self, x):
+        # Pass input tensor through the convolutional block
+        return self.conv(x)
+
+# Discriminator network for CycleGAN
+# Evaluates whether an image is real or generated using a PatchGAN architecture
+class Discriminator(nn.Module):
+    def __init__(self, in_channels=3, features=[64, 128, 256, 512]):
+        # Initialize the base nn.Module
+        super().__init__()
+
+        # Initial convolutional layer:
+        # Applies a 4x4 kernel with stride 2 for downsampling
+        # Uses reflection padding to reduce edge artifacts
+        self.initial = nn.Sequential(
+            nn.Conv2d(
+                in_channels,         # Number of input channels (e.g., 3 for RGB)
+                features[0],         # First feature map size (typically 64)
+                kernel_size=4,       # Kernel size for spatial reduction
+                stride=2,            # Downsample by factor of 2
+                padding=1,           # Padding to maintain spatial alignment
+                padding_mode="reflect"  # Use reflection padding for smoother borders
+            ),
+            nn.LeakyReLU(0.2, inplace=True)  # LeakyReLU activation with slope 0.2
+        )
+
+        # Create additional convolutional blocks for deeper feature extraction
+        layers = []
+        in_channels = features[0]  # Start with output channels from initial layer
+
+        # Iterate through remaining feature sizes to build the network
+        for feature in features[1:]:
+            # Use stride 1 for the last layer to preserve spatial resolution
+            # Use stride 2 for earlier layers to continue downsampling
+            layers.append(Block(
+                in_channels,         # Input channels from previous layer
+                feature,             # Output channels for current layer
+                stride=1 if feature == features[-1] else 2  # Conditional stride
+            ))
+            in_channels = feature   # Update input channels for next block
+
+        # Final convolutional layer:
+        # Outputs a single-channel prediction map (PatchGAN)
+        layers.append(nn.Conv2d(
+            in_channels,            # Input channels from last block
+            1,                      # Output channel for binary classification
+            kernel_size=4,          # Kernel size for final decision
+            stride=1,               # No further downsampling
+            padding=1,              # Padding to maintain spatial size
+            padding_mode="reflect"  # Use reflection padding
+        ))
+
+        # Combine all layers into a sequential model
+        self.model = nn.Sequential(*layers)
+
+    # Forward pass through the discriminator
+    def forward(self, x):
+        # Pass input through initial layer, then through the rest of the model
+        out = self.model(self.initial(x))
+
+        # Apply sigmoid activation to convert logits to probabilities
+        return torch.sigmoid(out)
+
+# Custom PyTorch Dataset class to load and pair images from two domains (A and B)
+class LoadData(Dataset):
+    def __init__(self, root_A, root_B, transform=None):
+        # Initialize the base Dataset class
+        super().__init__()
+
+        # Store the root directories for domain A and domain B
+        self.root_A = root_A
+        self.root_B = root_B
+
+        # Store the transformation function (e.g., from Albumentations or torchvision)
+        self.transform = transform
+
+        # Initialize list to hold image paths from domain A
+        self.A_images = []
+
+        # Loop through each directory in root_A
+        for r in root_A:
+            # List all files in the directory
+            files = os.listdir(r)
+
+            # Add valid image files to A_images list
+            self.A_images += [
+                os.path.join(r, i) for i in files
+                if i.endswith(".jpg") or i.endswith(".png") or
+                   i.endswith(".jpeg") or i.endswith(".gif")
+            ]
+
+        # Initialize list to hold image paths from domain B
+        self.B_images = []
+
+        # Loop through each directory in root_B
+        for r in root_B:
+            # List all files in the directory
+            files = os.listdir(r)
+
+            # Add valid image files to B_images list
+            self.B_images += [
+                os.path.join(r, i) for i in files
+                if i.endswith(".jpg") or i.endswith(".png") or
+                   i.endswith(".jpeg") or i.endswith(".gif")
+            ]
+
+        # Determine the length of the dataset based on the larger domain
+        self.len_data = max(len(self.A_images), len(self.B_images))
+
+        # Store individual lengths for modulo indexing
+        self.A_len = len(self.A_images)
+        self.B_len = len(self.B_images)
+
+    # Return the total number of samples in the dataset
+    def __len__(self):
+        return self.len_data
+
+    # Retrieve a paired sample from domain A and domain B
+    def __getitem__(self, index):
+        # Use modulo to cycle through images if lengths are unequal
+        A_img = self.A_images[index % self.A_len]
+        B_img = self.B_images[index % self.B_len]
+
+        # Load and convert images to RGB format
+        A_img = np.array(Image.open(A_img).convert("RGB"))
+        B_img = np.array(Image.open(B_img).convert("RGB"))
+
+        # Apply transformations if provided
+        if self.transform:
+            augmentations = self.transform(image=B_img, image0=A_img)
+            B_img = augmentations["image"]
+            A_img = augmentations["image0"]
+
+        # Return the transformed image pair
+        return A_img, B_img
