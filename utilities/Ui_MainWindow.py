@@ -1966,7 +1966,7 @@ class UI_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Computer Vision with Machine Learning and Deep Learning"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Computer Vision with Machine Learning and Deep Learning and Generative Adversarial Networks"))
         self.groupBox_FlipImage.setTitle(_translate("MainWindow", "Flip"))
         self.checkBox_FlipVertical.setText(_translate("MainWindow", "Vertical"))
         self.checkBox_FlipHorizantal.setText(_translate("MainWindow", "Horizantal"))
