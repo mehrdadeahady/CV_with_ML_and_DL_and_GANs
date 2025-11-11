@@ -5897,8 +5897,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="page_VariationalAutoEncodersGANs">
-     <widget class="QPushButton" name="pushButton_SaveCode_VAEGANs">
+    <widget class="QWidget" name="page_VariationalAutoEncoders">
+     <widget class="QPushButton" name="pushButton_SaveCode_VAE">
       <property name="geometry">
        <rect>
         <x>890</x>
@@ -5911,7 +5911,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Save Code</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_AEGANs">
+     <widget class="QLabel" name="label_AE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -5921,10 +5921,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>AutoEncoder GANs:</string>
+       <string>AutoEncoder:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DownloadDataset_AEGANs">
+     <widget class="QPushButton" name="pushButton_DownloadDataset_AE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -5937,7 +5937,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Download Dataset</string>
       </property>
      </widget>
-     <widget class="QTextBrowser" name="textBrowser_VAEGANs">
+     <widget class="QTextBrowser" name="textBrowser_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -5947,7 +5947,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_TestDataset_AEGANs">
+     <widget class="QPushButton" name="pushButton_TestDataset_AE">
       <property name="geometry">
        <rect>
         <x>340</x>
@@ -5960,7 +5960,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Test Dataset</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_PrepareDataset_AEGANs">
+     <widget class="QPushButton" name="pushButton_PrepareDataset_AE">
       <property name="geometry">
        <rect>
         <x>670</x>
@@ -5973,7 +5973,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Prepare Dataset</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_CreateModel_AEGANs">
+     <widget class="QPushButton" name="pushButton_CreateModel_AE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -5986,7 +5986,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Create Model</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_TrainModel_AEGANs">
+     <widget class="QPushButton" name="pushButton_TrainModel_AE">
       <property name="geometry">
        <rect>
         <x>340</x>
@@ -5999,7 +5999,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Train Model</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_TestModel_AEGANs">
+     <widget class="QPushButton" name="pushButton_TestModel_AE">
       <property name="geometry">
        <rect>
         <x>670</x>
@@ -6012,7 +6012,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Test Model</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_VAEGANs">
+     <widget class="QLabel" name="label_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6022,10 +6022,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>Variational AutoEncoder GANs:</string>
+       <string>Variational AutoEncoder:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_TestDataset_VAEGANs">
+     <widget class="QPushButton" name="pushButton_ArrangeDataset_VAE">
       <property name="geometry">
        <rect>
         <x>340</x>
@@ -6038,7 +6038,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Arrange Dataset</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_PrepareDataset_VAEGANs">
+     <widget class="QPushButton" name="pushButton_PrepareDataset_VAE">
       <property name="geometry">
        <rect>
         <x>670</x>
@@ -6051,7 +6051,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Prepare Dataset</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DownloadDataset_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DownloadDataset_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6064,7 +6064,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Download Dataset</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_CreateModel_VAEGANs">
+     <widget class="QPushButton" name="pushButton_CreateModel_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6077,7 +6077,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Create Model</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_TrainModel_VAEGANs">
+     <widget class="QPushButton" name="pushButton_TrainModel_VAE">
       <property name="geometry">
        <rect>
         <x>340</x>
@@ -6090,7 +6090,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Train Model</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_TestModel_VAEGANs">
+     <widget class="QPushButton" name="pushButton_TestModel_VAE">
       <property name="geometry">
        <rect>
         <x>670</x>
@@ -6103,7 +6103,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Test Model</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_EncodingArithmetic_VAEGANs">
+     <widget class="QLabel" name="label_EncodingArithmetic_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6116,7 +6116,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Encoding Arithmetic with the Trained VAE Model:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DisplayImagesWithGlasses_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DisplayImagesWithGlasses_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6129,7 +6129,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Display Images with Glasses</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DisplayImagesWithoutGlasses_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DisplayImagesWithoutGlasses_VAE">
       <property name="geometry">
        <rect>
         <x>510</x>
@@ -6142,7 +6142,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Display Images without Glasses</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DoubleTransitionCase1_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DoubleTransitionCase1_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6155,7 +6155,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Double Transition Case 1</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DoubleTransitionCase2_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DoubleTransitionCase2_VAE">
       <property name="geometry">
        <rect>
         <x>210</x>
@@ -6168,7 +6168,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Double Transition Case 2</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DoubleTransitionCase3_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DoubleTransitionCase3_VAE">
       <property name="geometry">
        <rect>
         <x>400</x>
@@ -6181,7 +6181,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Double Transition Case 3</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DoubleTransitionCase4_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DoubleTransitionCase4_VAE">
       <property name="geometry">
        <rect>
         <x>600</x>
@@ -6194,7 +6194,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Double Transition Case 4</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_DoubleTransitionCase5_VAEGANs">
+     <widget class="QPushButton" name="pushButton_DoubleTransitionCase5_VAE">
       <property name="geometry">
        <rect>
         <x>800</x>
@@ -6207,7 +6207,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Double Transition Case 5</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_WomanWithGlassesToWomanWithoutGlasses_VAEGANs">
+     <widget class="QPushButton" name="pushButton_WomanWithGlassesToWomanWithoutGlasses_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6220,7 +6220,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Woman with Glasses to Woman without Glasses</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_ManWithGlassesToManWithoutGlasses_VAEGANs">
+     <widget class="QPushButton" name="pushButton_ManWithGlassesToManWithoutGlasses_VAE">
       <property name="geometry">
        <rect>
         <x>510</x>
@@ -6233,7 +6233,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Man with Glasses to Man without Glasses</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_WomanWithoutGlassesToManWithoutGlasses_VAEGANs">
+     <widget class="QPushButton" name="pushButton_WomanWithoutGlassesToManWithoutGlasses_VAE">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -6246,7 +6246,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Woman without Glasses to Man without Glasses</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_WomanWithGlassesToManWithGlasses_VAEGANs">
+     <widget class="QPushButton" name="pushButton_WomanWithGlassesToManWithGlasses_VAE">
       <property name="geometry">
        <rect>
         <x>510</x>

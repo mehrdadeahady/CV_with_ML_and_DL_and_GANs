@@ -132,7 +132,7 @@ class ConditionalGANs(QObject):
     # Method to organize the eyeglasses dataset into two folders: with glasses and without glasses
     def ArrangeEyeGlassesDataset(self):
         # Check if the dataset files and folders exist and contain enough files
-        if os.path.exists("kagglehub/train.csv") and os.path.exists("kagglehub/faces") and self.CountFilesInPath("kagglehub/glasses") + self.CountFilesInPath("kagglehub/faces") >= 5002:
+        if os.path.exists("kagglehub/train.csv") and os.path.exists("kagglehub/faces") and self.CountFilesInPath("kagglehub/glasses") + self.CountFilesInPath("kagglehub/faces") >= 5000:
             if self.train is None:
                 # Load the training metadata from CSV
                 self.train = pd.read_csv("kagglehub/train.csv")

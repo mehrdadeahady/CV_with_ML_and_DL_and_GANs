@@ -14,7 +14,7 @@ from utilities.DLbyPyTorch import DLbyPyTorch
 from utilities.SimpleGANs import SimpleGANs
 from utilities.ConditionalGANs import ConditionalGANs
 from utilities.CycleGANs import CycleGANs
-from utilities.VariationalAutoEncodersGANs import VariationalAutoEncodersGANs
+from utilities.VariationalAutoEncoders import VariationalAutoEncoders
 from utilities.ScrollableMessageBox import show_scrollable_message
 import os
 from os import path, listdir
@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         self.action_SimpleGANs.setText(_translate("MainWindow","🔰 Creating 4 Simple GANs"))
         self.action_ConditionalGANs.setText(_translate("MainWindow","🐦‍🔥 Creating Conditional GANs (cGAN, wGAN)"))
         self.action_CycleGANs.setText(_translate("MainWindow","🎭 Creating Cycle GANs"))
-        self.action_VariationalAutoEncodersGANs.setText(_translate("MainWindow","🧩 Creating Variational AutoEncoders GANs"))
+        self.action_VariationalAutoEncoders.setText(_translate("MainWindow","🧩 Creating Variational AutoEncoders GANs"))
 
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -620,13 +620,19 @@ class MainWindow(QMainWindow):
            else:
                 QMessageBox.warning(None, "No Image/Style","First, Select an Image and a Style.")
 
-    def PrepareDownloadMINIST(self):
+    def PrepareDownloadFashionMINIST(self):
         if not os.path.exists("temp/FashionMNIST") or self.get_dir_size("temp/FashionMNIST") < 84000000:
             _ = self.CheckCreateDefaultFolders()
-            self.DLbyPyTorchHandler.DownloadMINIST()
+            self.DLbyPyTorchHandler.DownloadFashionMINIST()
         else:
-            self.DLbyPyTorchHandler.DownloadMINIST(download=False)
-            # QMessageBox.information(None,"FashionMNIST Exist","Fashion-MINIST Dataset Already Downloaded.")
+            self.DLbyPyTorchHandler.DownloadFashionMINIST(download=False)
+
+    def PrepareDownloadMINIST(self):
+        if not os.path.exists("temp/MNIST") or self.get_dir_size("temp/MNIST") < 84000000:
+            _ = self.CheckCreateDefaultFolders()
+            self.VAEHandler.DownloadMINIST()
+        else:
+            self.VAEHandler.DownloadMINIST(download = False)
 
     def DownloadEyeGlassesDataset(self):
         if  self.CountFilesInPath("kagglehub/glasses") + self.CountFilesInPath("kagglehub/faces") < 5002:
@@ -1192,6 +1198,29 @@ class MainWindow(QMainWindow):
         self.ConditionalGANsHandler.GenerateAndDisplayImages(sender)
 
     def ConnectActions(self):
+        self.ui.pushButton_ManWithGlassesToManWithoutGlasses_VAE.clicked.connect(partial(self.VAEHandler.Transition, self.ui.pushButton_ManWithGlassesToManWithoutGlasses_VAE.objectName()))
+        self.ui.pushButton_WomanWithoutGlassesToManWithoutGlasses_VAE.clicked.connect(partial(self.VAEHandler.Transition, self.ui.pushButton_WomanWithoutGlassesToManWithoutGlasses_VAE.objectName()))
+        self.ui.pushButton_WomanWithGlassesToManWithGlasses_VAE.clicked.connect(partial(self.VAEHandler.Transition, self.ui.pushButton_WomanWithGlassesToManWithGlasses_VAE.objectName()))
+        self.ui.pushButton_WomanWithGlassesToWomanWithoutGlasses_VAE.clicked.connect(partial(self.VAEHandler.Transition, self.ui.pushButton_WomanWithGlassesToWomanWithoutGlasses_VAE.objectName()))
+        self.ui.pushButton_DoubleTransitionCase5_VAE.clicked.connect(self.VAEHandler.DoubleTransitionCase5)
+        self.ui.pushButton_DoubleTransitionCase4_VAE.clicked.connect(self.VAEHandler.DoubleTransitionCase4)
+        self.ui.pushButton_DoubleTransitionCase3_VAE.clicked.connect(self.VAEHandler.DoubleTransitionCase3)
+        self.ui.pushButton_DoubleTransitionCase2_VAE.clicked.connect(self.VAEHandler.DoubleTransitionCase2)
+        self.ui.pushButton_DoubleTransitionCase1_VAE.clicked.connect(self.VAEHandler.DoubleTransitionCase1)
+        self.ui.pushButton_DisplayImagesWithoutGlasses_VAE.clicked.connect(self.VAEHandler.DisplayImagesWithoutGlasses)
+        self.ui.pushButton_DisplayImagesWithGlasses_VAE.clicked.connect(self.VAEHandler.DisplayImagesWithGlasses)
+        self.ui.pushButton_TestModel_VAE.clicked.connect(self.VAEHandler.TestVAEModel)
+        self.ui.pushButton_TrainModel_VAE.clicked.connect(self.VAEHandler.TrainVAEModel)
+        self.ui.pushButton_CreateModel_VAE.clicked.connect(self.VAEHandler.CreateVAEModel)
+        self.ui.pushButton_PrepareDataset_VAE.clicked.connect(self.VAEHandler.PrepareVAEDataset)
+        self.ui.pushButton_ArrangeDataset_VAE.clicked.connect(self.ConditionalGANsHandler.ArrangeEyeGlassesDataset)
+        self.ui.pushButton_DownloadDataset_VAE.clicked.connect(self.DownloadEyeGlassesDataset)
+        self.ui.pushButton_TestModel_AE.clicked.connect(self.VAEHandler.TestAEModel)
+        self.ui.pushButton_TrainModel_AE.clicked.connect(self.VAEHandler.TrainAEMode)
+        self.ui.pushButton_CreateModel_AE.clicked.connect(self.VAEHandler.CreateAEModel)
+        self.ui.pushButton_PrepareDataset_AE.clicked.connect(self.VAEHandler.PrepareAEDataset)
+        self.ui.pushButton_TestDataset_AE.clicked.connect(self.VAEHandler.TestMINIST)
+        self.ui.pushButton_DownloadDataset_AE.clicked.connect(self.PrepareDownloadMINIST)
         self.ui.pushButton_ImplementingLast_cGAN_for_EyeGlasses_by_CycleGAN_CycleGANs.clicked.connect(self.CycleGANsHandler.Implementing_Last_cGAN_for_EyeGlasses_by_CycleGAN)
         self.ui.pushButton_ShowImagesWithBlondHair_CycleGANs.clicked.connect(partial(self.CycleGANsHandler.GenerateAndDisplayImages,self.ui.pushButton_ShowImagesWithBlondHair_CycleGANs.objectName()))
         self.ui.pushButton_ShowImagesWithDarkHair_CycleGANs.clicked.connect(partial(self.CycleGANsHandler.GenerateAndDisplayImages,self.ui.pushButton_ShowImagesWithDarkHair_CycleGANs.objectName()))
@@ -1233,7 +1262,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_CreateModels_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.CreateModels_GrayImages)
         self.ui.pushButton_PlotDataset_GrayImages_SimpleGANs.clicked.connect(self.SimpleGANsHandler.PlotMINIST)
         self.ui.pushButton_PrepareDataset_GrayImages_SimpleGANs.clicked.connect(self.PrepareDataset_GrayImages_SimpleGANs)
-        self.ui.pushButton_DownloadDataset_GrayImages_SimpleGANs.clicked.connect(self.PrepareDownloadMINIST)
+        self.ui.pushButton_DownloadDataset_GrayImages_SimpleGANs.clicked.connect(self.PrepareDownloadFashionMINIST)
         self.ui.pushButton_TestModel_Shape_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_Shape)
         self.ui.pushButton_TestModel_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.TestModel_Numbers)
         self.ui.pushButton_SaveModel_Numbers_SimpleGANs.clicked.connect(self.SimpleGANsHandler.SaveModel_Numbers)
@@ -1259,7 +1288,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_PrepareDataStep4DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.PrepareDataForMultiCategoryClassification)
         self.ui.pushButton_PlotMNISTStep1DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.PlotMINIST)
         self.ui.pushButton_TestMNISTStep1DLbyPyTorch.clicked.connect(self.DLbyPyTorchHandler.TestMINIST)
-        self.ui.pushButton_DownloadMNISTStep1DLbyPyTorch.clicked.connect(self.PrepareDownloadMINIST)
+        self.ui.pushButton_DownloadMNISTStep1DLbyPyTorch.clicked.connect(self.PrepareDownloadFashionMINIST)
         self.ui.comboBox_TransferStyle_NeuralStyleTransfer.currentTextChanged.connect(self.PrepareTransferStyle)
         self.ui.comboBox_SelectStyle_NeuralStyleTransfer.currentTextChanged.connect(self.NeuralStyleTransferHandler.SelectShowStyle)
         self.ui.comboBox_SelectImage_NeuralStyleTransfer.currentTextChanged.connect(self.SelectImage_NeuralStyleTransfer)
@@ -1309,7 +1338,7 @@ class MainWindow(QMainWindow):
         self.action_SimpleGANs.triggered.connect(self.changePage)
         self.action_ConditionalGANs.triggered.connect(self.changePage)
         self.action_CycleGANs.triggered.connect(self.changePage)
-        self.action_VariationalAutoEncodersGANs.triggered.connect(self.changePage)
+        self.action_VariationalAutoEncoders.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1339,7 +1368,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode_SimpleGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_SimpleGANs))
         self.ui.pushButton_SaveCode_ConditionalGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_ConditionalGANs))
         self.ui.pushButton_SaveCode_CycleGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CycleGANs))
-        self.ui.pushButton_SaveCode_VAEGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_VAEGANs))
+        self.ui.pushButton_SaveCode_VAE.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_VAE))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1443,7 +1472,7 @@ class MainWindow(QMainWindow):
         self.SimpleGANsHandler = SimpleGANs()
         self.ConditionalGANsHandler = ConditionalGANs()
         self.CycleGANsHandler = CycleGANs()
-        self.VAEGANsHandler = VariationalAutoEncodersGANs()
+        self.VAEHandler = VariationalAutoEncoders()
         
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
@@ -1607,9 +1636,9 @@ class MainWindow(QMainWindow):
         self.action_CycleGANs = QtGui.QAction(parent=self)
         self.action_CycleGANs.setObjectName("action_CycleGANs")
         self.menu_PracticalGANs.addAction(self.action_CycleGANs)
-        self.action_VariationalAutoEncodersGANs = QtGui.QAction(parent=self)
-        self.action_VariationalAutoEncodersGANs.setObjectName("action_VariationalAutoEncodersGANs")
-        self.menu_PracticalGANs.addAction(self.action_VariationalAutoEncodersGANs)
+        self.action_VariationalAutoEncoders = QtGui.QAction(parent=self)
+        self.action_VariationalAutoEncoders.setObjectName("action_VariationalAutoEncoders")
+        self.menu_PracticalGANs.addAction(self.action_VariationalAutoEncoders)
 
 
         self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
@@ -1655,7 +1684,7 @@ class MainWindow(QMainWindow):
         self.FillCode(SimpleGANs,self.ui.textBrowser_SimpleGANs, 77)
         self.FillCode(ConditionalGANs,self.ui.textBrowser_ConditionalGANs, 73)
         self.FillCode(CycleGANs,self.ui.textBrowser_CycleGANs, 63)
-        self.FillCode(VariationalAutoEncodersGANs,self.ui.textBrowser_VAEGANs, 20)
+        self.FillCode(VariationalAutoEncoders,self.ui.textBrowser_VAE, 102)
 
 def LunchApp():
     import sys

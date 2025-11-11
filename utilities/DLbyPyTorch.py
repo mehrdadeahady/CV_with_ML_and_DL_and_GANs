@@ -66,7 +66,12 @@ class DLbyPyTorch(QObject):
         self.text_labels = ['t-shirt', 'trouser', 'pullover', 'dress', 'coat','sandal', 'shirt', 'sneaker', 'bag', 'ankle boot']                          
     
     # Method to download the Fashion-MNIST dataset and log the process in a popup
-    def DownloadMINIST(self, download=True):
+    def DownloadFashionMINIST(self, download=True):
+        if not os.path.exists("temp/FashionMNIST") or self.get_dir_size("temp/FashionMNIST") < 84000000:
+            download = True
+        else:
+            download = False
+
         # Create a popup window to display download logs
         self.DownloadLogPopup = DownloadLogPopup(self.log_emitter)
 
@@ -104,7 +109,7 @@ class DLbyPyTorch(QObject):
             # Download and load the Fashion-MNIST test dataset
             self.test_set = torchvision.datasets.FashionMNIST(
                 root="temp",              # Same directory for consistency
-                train=True,               # This should likely be 'False' to load test data
+                train=False,               # This should likely be 'False' to load test data
                 download=download,        # Download if needed
                 transform=self.transform  # Apply the same transformations
             )
@@ -133,7 +138,7 @@ class DLbyPyTorch(QObject):
         if len(self.train_set) < 1:
             try:
                 # Attempt to load the dataset without downloading again
-                _ = self.DownloadMINIST(download=False)
+                _ = self.DownloadFashionMINIST(download=False)
 
                 # Close the download log popup after loading
                 self.DownloadLogPopup.close()
@@ -184,7 +189,7 @@ class DLbyPyTorch(QObject):
         if len(self.train_set) < 1:
             try:
                 # Attempt to load the dataset without downloading again
-                _ = self.DownloadMINIST(download=False)
+                _ = self.DownloadFashionMINIST(download=False)
 
                 # Close the download log popup after loading
                 self.DownloadLogPopup.close()
@@ -241,7 +246,7 @@ class DLbyPyTorch(QObject):
         if len(self.train_set) < 1:
             try:
                 # Attempt to load the dataset without downloading again
-                _ = self.DownloadMINIST(download=False)
+                _ = self.DownloadFashionMINIST(download=False)
 
                 # Close the download log popup after loading
                 self.DownloadLogPopup.close()
@@ -468,7 +473,7 @@ class DLbyPyTorch(QObject):
         if len(self.train_set) < 1:
             try:
                 # Attempt to load dataset without downloading again
-                _ = self.DownloadMINIST(download=False)
+                _ = self.DownloadFashionMINIST(download=False)
                 self.DownloadLogPopup.close()
             except:
                 # Show warning if loading fails
@@ -636,6 +641,16 @@ class DLbyPyTorch(QObject):
             self.DownloadLogPopup.Append_Log(f"The Accuracy of the Predictions is {accuracy}")
             # Show the plotted images
             plt.show()
+
+    def get_dir_size(self,path):
+        total = 0
+        with os.scandir(path) as it:
+            for entry in it:
+                if entry.is_file():
+                    total += entry.stat().st_size
+                elif entry.is_dir():
+                    total += self.get_dir_size(entry.path)
+        return total # Bytes
 
 # A stream wrapper class that redirects output to a logging callback
 class PopupStream:
