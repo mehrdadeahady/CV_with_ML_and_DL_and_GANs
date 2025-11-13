@@ -15,6 +15,7 @@ from utilities.SimpleGANs import SimpleGANs
 from utilities.ConditionalGANs import ConditionalGANs
 from utilities.CycleGANs import CycleGANs
 from utilities.VariationalAutoEncoders import VariationalAutoEncoders
+from utilities.TextGenerationByRNN import TextGenerationByRNN
 from utilities.ScrollableMessageBox import show_scrollable_message
 import os
 from os import path, listdir
@@ -107,6 +108,7 @@ class MainWindow(QMainWindow):
         self.action_ConditionalGANs.setText(_translate("MainWindow","🐦‍🔥 Creating Conditional GANs (cGAN, wGAN)"))
         self.action_CycleGANs.setText(_translate("MainWindow","🎭 Creating Cycle GANs"))
         self.action_VariationalAutoEncoders.setText(_translate("MainWindow","🧩 Creating Variational AutoEncoders GANs"))
+        self.action_TextGenerationByRNN.setText(_translate("MainWindow","🥨 Generating Text by RNNs"))
 
     def PrepareCancelTraining(self):
         self.CreateSimpleCNNHandler.CancelTraining()
@@ -1339,6 +1341,7 @@ class MainWindow(QMainWindow):
         self.action_ConditionalGANs.triggered.connect(self.changePage)
         self.action_CycleGANs.triggered.connect(self.changePage)
         self.action_VariationalAutoEncoders.triggered.connect(self.changePage)
+        self.action_TextGenerationByRNN.triggered.connect(self.changePage)
 
         self.ui.action_CloseOtherWindows.triggered.connect(self.closeWindow)
         self.ui.action_CloseMainWindow.triggered.connect(self.closeWindow)
@@ -1369,6 +1372,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_SaveCode_ConditionalGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_ConditionalGANs))
         self.ui.pushButton_SaveCode_CycleGANs.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_CycleGANs))
         self.ui.pushButton_SaveCode_VAE.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_VAE))
+        self.ui.pushButton_SaveCode_TextGenerationByRNN.clicked.connect(partial(self.SaveCode,self.ui.textBrowser_TextGenerationByRNN))
 
         self.ui.comboBox_ColorSpaceConversion.currentTextChanged.connect(self.PrepareConvertColorSpace)
         self.ui.pushButton_SaveImage.clicked.connect(self.ImagesAndColorsHandler.SaveImage)
@@ -1473,6 +1477,7 @@ class MainWindow(QMainWindow):
         self.ConditionalGANsHandler = ConditionalGANs()
         self.CycleGANsHandler = CycleGANs()
         self.VAEHandler = VariationalAutoEncoders()
+        self.TextGenerationByRNNHandler = TextGenerationByRNN()
         
         self.ColorChannelChangeCheckBoxes = [
             self.ui.checkBox_BlueChannel,
@@ -1639,7 +1644,9 @@ class MainWindow(QMainWindow):
         self.action_VariationalAutoEncoders = QtGui.QAction(parent=self)
         self.action_VariationalAutoEncoders.setObjectName("action_VariationalAutoEncoders")
         self.menu_PracticalGANs.addAction(self.action_VariationalAutoEncoders)
-
+        self.action_TextGenerationByRNN = QtGui.QAction(parent=self)
+        self.action_TextGenerationByRNN.setObjectName("action_TextGenerationByRNN")
+        self.menu_PracticalGANs.addAction(self.action_TextGenerationByRNN)
 
         self.menu_TheoreticalGANsDeploymentOptimization = QMenu(parent=self)
         self.menu_TheoreticalGANsDeploymentOptimization.setObjectName("menu_TheoreticalGANsDeploymentOptimization")
@@ -1685,6 +1692,7 @@ class MainWindow(QMainWindow):
         self.FillCode(ConditionalGANs,self.ui.textBrowser_ConditionalGANs, 73)
         self.FillCode(CycleGANs,self.ui.textBrowser_CycleGANs, 63)
         self.FillCode(VariationalAutoEncoders,self.ui.textBrowser_VAE, 102)
+        self.FillCode(TextGenerationByRNN,self.ui.textBrowser_TextGenerationByRNN, 12)
 
 def LunchApp():
     import sys

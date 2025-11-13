@@ -100,7 +100,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>11</number>
+     <number>12</number>
     </property>
     <widget class="QWidget" name="page_ImagesAndColorsManipulationsAndOprations">
      <property name="sizePolicy">
@@ -6257,6 +6257,239 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="text">
        <string>Woman with Glasses to Man with Glasses</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_TextGenerationByRNN">
+     <widget class="QLabel" name="label_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Text Generation by Recurrent Neural Network (RNN):</string>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="textBrowser_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>360</y>
+        <width>981</width>
+        <height>321</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SaveCode_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>680</y>
+        <width>100</width>
+        <height>40</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save Code</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CharecterTockenizaion_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Charecter Tockenizaion</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_WordTockenizaion_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>30</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Word Tockenizaion</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SubWordTockenizaion_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>670</x>
+        <y>30</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>SubWord Tockenizaion</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_LoadSampleText_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>90</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Sample Text</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CleanSampleText_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>90</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Clean Sample Text</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_PrepareSampleText_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>670</x>
+        <y>90</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Prepare Sample Text</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_CreateModel_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>150</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Create Model</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TrainModel_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>150</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Train Model</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_TestModel_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>670</x>
+        <y>150</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Test Model ( Generate Text )</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Sampling_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>200</y>
+        <width>981</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Temperature and Top-K sampling in Text Generation:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SampleWithDefaultSetting_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>230</y>
+        <width>981</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sample with Default Setting</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SampleWithLowTemperature_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>270</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sample with Low Temperature</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SampleWithHighTemperature_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>270</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sample with High Temperature</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SampleWithHighTopK_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>310</y>
+        <width>481</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sample with High Top-K</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_SampleWithLowTopK_TextGenerationByRNN">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>310</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Sample with Low Top-K</string>
       </property>
      </widget>
     </widget>
